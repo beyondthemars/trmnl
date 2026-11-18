@@ -1,16 +1,18 @@
 ---
-strategy: webhook
-no_screen_padding:
-dark_mode:
-static_data:
-polling_verb:
-framework_version:
-serverless_language:
-refresh_interval_floor:
-polling_url:
-polling_headers:
-polling_body:
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: 3.4.6
+serverless_language: ''
+refresh_interval_floor: ''
+polling_url: "https://api.open-meteo.com/v1/forecast?latitude=55.42033&longitude=8.37439&timezone=Europe%2FCopenhagen&timeformat=unixtime&forecast_days=3&wind_speed_unit=ms&models=dmi_harmonie_arome_europe&hourly=temperature_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m%2Cwind_gusts_10m&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_gusts_10m\r\nhttps://api.open-meteo.com/v1/forecast?latitude=55.446&longitude=8.397&timezone=Europe%2FCopenhagen&timeformat=unixtime&forecast_days=3&wind_speed_unit=ms&models=dmi_harmonie_arome_europe&hourly=temperature_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m%2Cwind_gusts_10m&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_gusts_10m\r\nhttps://api.open-meteo.com/v1/forecast?latitude=55.555&longitude=8.13&timezone=Europe%2FCopenhagen&timeformat=unixtime&forecast_days=3&wind_speed_unit=ms&models=dmi_harmonie_arome_europe&hourly=temperature_2m%2Cprecipitation%2Ccloud_cover%2Cwind_speed_10m%2Cwind_gusts_10m&current=temperature_2m%2Crelative_humidity_2m%2Cwind_speed_10m%2Cwind_gusts_10m\r\nhttps://opendataapi.dmi.dk/v2/metObs/collections/observation/items?stationId=06088&period=latest-hour&limit=200\r\nhttps://opendataapi.dmi.dk/v2/metObs/collections/observation/items?stationId=06081&period=latest-hour&limit=200\r\nhttps://opendataapi.dmi.dk/v2/oceanObs/collections/observation/items?stationId=25151&parameterId=tw&period=latest&limit=10\r\nhttps://opendataapi.dmi.dk/v2/oceanObs/collections/tidewater/items?stationId=25139&predictionType=minimum_maximum&datetime={{ \"now\" | date: \"%Y-%m-%d\" }}T00:00:00Z/{{ \"now\" | date: \"%s\" | plus: 172800 | date: \"%Y-%m-%d\" }}T23:59:59Z&limit=20\r\n"
+polling_headers: ''
+polling_body: ''
 id: 545208
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
 name: Wetter Fanø
-description:
+description: ''
 refresh_interval: 15
