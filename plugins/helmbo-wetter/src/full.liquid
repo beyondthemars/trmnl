@@ -1,0 +1,63 @@
+<style>
+.fano, .fano * { box-sizing: border-box; }
+.fano { width: 800px; height: 480px; padding: 18px 26px 13px; background: #fff; color: #000;
+  font: 16px Arial, sans-serif; font-variant-numeric: tabular-nums; display: grid;
+  grid-template-rows: 49px 119px 175px 65px 21px; }
+.fano header, .fano footer { display: flex; align-items: center; justify-content: space-between; }
+.fano header { border-bottom: 3px solid; }
+.fano h1 { font-size: 32px; line-height: 1; margin: 0; font-weight: 800; }
+.fano h1 span { font-size: 19px; margin-left: 12px; font-weight: 500; }
+.fano .caps { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.fano .now { display: grid; grid-template-columns: 220px 250px 1fr; align-items: center; }
+.fano .now > div { padding: 0 15px; border-left: 1px solid; }
+.fano .now > div:first-child { border: 0; padding-left: 0; }
+.fano .reading { display: block; font-size: 51px; font-weight: 800; line-height: 1; margin: 3px 0; }
+.fano .now small { font-size: 16px; font-weight: 600; }
+.fano .wind-pair { display: flex; gap: 28px; }
+.fano .wind-pair .reading { font-size: 42px; }
+.fano .wind-pair small, .fano .reading small { font-size: 17px; }
+.fano table { border-collapse: collapse; width: 100%; table-layout: fixed; line-height: 1; }
+.fano th, .fano td { text-align: left; border-bottom: 1px solid; padding: 0 8px; white-space: nowrap; }
+.fano th { background: #000; color: #fff; height: 25px; font-size: 13px; }
+.fano td { font-size: 15px; height: 30px; }
+.fano td:first-child { font-weight: 750; }
+.fano td span { font-size: 13px; font-weight: 400; margin-left: 5px; }
+.fano .coast { display: grid; grid-template-columns: 1fr 1fr 1.25fr; align-items: center; }
+.fano .coast > div { border-left: 1px solid; padding-left: 14px; }
+.fano .coast > div:first-child { border: 0; padding-left: 0; }
+.fano .coast strong { display: inline-block; margin-top: 2px; font-size: 27px; line-height: 1; }
+.fano .coast small { font-size: 14px; margin-left: 6px; }
+.fano footer { border-top: 1px solid; font-size: 12px; }
+</style>
+<main class="fano">
+  <header>
+    <h1>Fanø<span>{{ place | escape }}</span></h1>
+    <div class="caps">{{ updated | escape }} Ortszeit</div>
+  </header>
+  <section class="now" aria-label="Aktuelles Wetter">
+    <div><div class="caps">Temperatur</div><strong class="reading">{{ temp }}<small> °C</small></strong><small>Gefühlt {{ feels }} °C</small></div>
+    <div class="wind-pair">
+      <div><div class="caps">Wind</div><strong class="reading">{{ wind }}</strong><small>Bft</small></div>
+      <div><div class="caps">Böen</div><strong class="reading">{{ gust }}</strong><small>Bft</small></div>
+    </div>
+    <div><div class="caps">Niederschlag</div><strong class="reading">{{ rain }}<small> mm</small></strong><small>{{ rain_label }} Uhr</small></div>
+  </section>
+  <table aria-label="Wettervorhersage">
+    <colgroup><col style="width:31%"><col style="width:19%"><col style="width:19%"><col style="width:15%"><col style="width:16%"></colgroup>
+    <thead><tr><th>ZEITRAUM</th><th>WETTER</th><th>TEMPERATUR</th><th>NIEDERSCHLAG</th><th>WIND / BÖEN</th></tr></thead>
+    <tbody>
+    {% for row in today %}
+      <tr><td>{{ row.label }}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td>{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
+    {% endfor %}
+    {% for row in days %}
+      <tr><td>{{ row.label }}{% if row.mixed %}*{% endif %}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td>{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <section class="coast" aria-label="Gezeiten und Wassertemperatur">
+    <div><div class="caps">Nächste Ebbe · Nordby</div><strong>{{ ebb }}</strong><small>{{ ebb_day }}</small></div>
+    <div><div class="caps">Nächste Flut · Nordby</div><strong>{{ flood }}</strong><small>{{ flood_day }}</small></div>
+    <div><div class="caps">Wasser · Esbjerg Havn</div><strong>{{ water }} °C</strong>{% if water_time %}<small>{{ water_time }} Uhr</small>{% endif %}</div>
+  </section>
+  <footer><span>{{ current_source | escape }} · DMI-Gezeiten{% if mixed %} · * Modellmix{% endif %}</span><span>{% if missing.size > 0 %}Datenlücken{% else %}DMI / Open-Meteo{% endif %}</span></footer>
+</main>

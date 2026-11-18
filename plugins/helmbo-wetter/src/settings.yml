@@ -1,0 +1,16 @@
+---
+strategy: webhook
+no_screen_padding:
+dark_mode:
+static_data:
+polling_verb:
+framework_version:
+serverless_language:
+refresh_interval_floor:
+polling_url:
+polling_headers:
+polling_body:
+id: 545208
+name: Wetter Fanø
+description:
+refresh_interval: 15
