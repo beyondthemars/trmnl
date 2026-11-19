@@ -116,10 +116,13 @@ function buildDisplay(events, today, generatedAt) {
 async function run(input) {
   const now = new Date();
   const today = berlinDate(now);
-  const generatedAt = new Intl.DateTimeFormat("de-DE", {
-    timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit"
-  }).format(now);
+  // Locale-Daten sind in manchen Node-Runtimes reduziert. Immer explizit DE formatieren.
+  const timeParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit", hour12: false
+  }).formatToParts(now);
+  const part = (name) => timeParts.find((item) => item.type === name)?.value ?? "00";
+  const generatedAt =
+    `${String(today.day).padStart(2, "0")}.${String(today.month).padStart(2, "0")}.${today.year} · ${part("hour")}:${part("minute")}`;
   const settings = input?.trmnl?.plugin_settings?.custom_fields_values ?? {};
   const street = String(settings.street ?? "").trim();
   const houseNumber = String(settings.house_number ?? "").trim();
