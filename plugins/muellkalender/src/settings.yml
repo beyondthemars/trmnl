@@ -1,6 +1,21 @@
 ---
-name: Muellkalender Kiel
-strategy: webhook
-refresh_interval: 60
+name: Müllkalender Kiel
+strategy: polling
+refresh_interval: 720
+polling_verb: GET
+polling_url: "https://abki.de/abki-services/strassennamen?filter%5Blogic%5D=and&filter%5Bfilters%5D%5B0%5D%5Bvalue%5D={{ street | url_encode }}&filter%5Bfilters%5D%5B0%5D%5Bfield%5D=Strasse&filter%5Bfilters%5D%5B0%5D%5Boperator%5D=startswith&filter%5Bfilters%5D%5B0%5D%5BignoreCase%5D=true"
+polling_headers: ''
+serverless_language: node
 no_screen_padding: 'no'
 dark_mode: 'no'
+custom_fields:
+  - keyname: street
+    name: Straße
+    field_type: string
+    description: Straßenname des Behälterstandorts in Kiel
+    placeholder: Weißdornweg
+  - keyname: house_number
+    name: Hausnummer
+    field_type: string
+    description: Nummer des Behälterstandorts (ggf. mit Zusatz)
+    placeholder: '14'
