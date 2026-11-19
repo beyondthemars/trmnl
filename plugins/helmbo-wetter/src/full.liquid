@@ -8,17 +8,20 @@
 .fano h1 { font-size: 32px; line-height: 1; margin: 0; font-weight: 800; }
 .fano h1 span { font-size: 19px; margin-left: 12px; font-weight: 500; }
 .fano .caps { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-.fano .now { display: grid; grid-template-columns: 220px 250px 1fr; align-items: center; }
+.fano .now { display: grid; grid-template-columns: 215px 315px 1fr; align-items: center; }
 .fano .now > div { padding: 0 15px; border-left: 1px solid; }
 .fano .now > div:first-child { border: 0; padding-left: 0; }
 .fano .reading { display: block; font-size: 51px; font-weight: 800; line-height: 1; margin: 3px 0; }
 .fano .now small { font-size: 16px; font-weight: 600; }
-.fano .wind-pair { display: flex; gap: 28px; }
-.fano .wind-pair .reading { font-size: 42px; }
+.fano .wind-pair { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fano .wind-pair .reading { font-size: 40px; }
 .fano .wind-pair small, .fano .reading small { font-size: 17px; }
+.fano .windrose { width: 86px; flex: 0 0 86px; display: flex; align-items: center; flex-direction: column; gap: 0; }
+.fano .windrose svg { display: block; width: 78px; height: 73px; }
+.fano .windrose .dir { font-size: 14px; font-weight: 800; line-height: 1; }
 .fano table { border-collapse: collapse; width: 100%; table-layout: fixed; line-height: 1; }
-.fano th, .fano td { text-align: left; border-bottom: 1px solid; padding: 0 8px; white-space: nowrap; }
-.fano th { background: #000; color: #fff; height: 25px; font-size: 13px; }
+.fano th, .fano td { text-align: left; border-bottom: 1px solid; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.fano th { background: #000; color: #fff; height: 25px; font-size: 12px; }
 .fano td { font-size: 15px; height: 30px; }
 .fano td:first-child { font-weight: 750; }
 .fano td span { font-size: 13px; font-weight: 400; margin-left: 5px; }
@@ -39,11 +42,31 @@
     <div class="wind-pair">
       <div><div class="caps">Wind</div><strong class="reading">{{ wind }}</strong><small>Bft</small></div>
       <div><div class="caps">Böen</div><strong class="reading">{{ gust }}</strong><small>Bft</small></div>
+      <div class="windrose" aria-label="Wind aus {{ wind_dir }}">
+        <svg viewBox="0 0 90 84" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Windrichtung {{ wind_dir }}">
+          <circle cx="45" cy="42" r="25" fill="none" stroke="#000" stroke-width="1.5"/>
+          <path d="M45 15V19 M45 65V69 M18 42H22 M68 42H72" fill="none" stroke="#000" stroke-width="1.5"/>
+          <g font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#000" text-anchor="middle">
+            <text x="45" y="11">N</text><text x="81" y="46">O</text>
+            <text x="45" y="82">S</text><text x="9" y="46">W</text>
+          </g>
+          {% if wind_deg != nil %}
+          <g transform="rotate({{ wind_deg }}, 45, 42)">
+            <path d="M45 21 L38 40 L45 35 L52 40 Z" fill="#000"/>
+            <path d="M45 36V62" stroke="#000" stroke-width="2"/>
+          </g>
+          {% else %}
+          <text x="45" y="47" font-size="16" text-anchor="middle">–</text>
+          {% endif %}
+          <circle cx="45" cy="42" r="2.5" fill="#000"/>
+        </svg>
+        <span class="dir">{{ wind_dir }}</span>
+      </div>
     </div>
     <div><div class="caps">Niederschlag</div><strong class="reading">{{ rain }}<small> mm</small></strong><small>{{ rain_label }} Uhr</small></div>
   </section>
   <table aria-label="Wettervorhersage">
-    <colgroup><col style="width:31%"><col style="width:19%"><col style="width:19%"><col style="width:15%"><col style="width:16%"></colgroup>
+    <colgroup><col style="width:25%"><col style="width:16%"><col style="width:18%"><col style="width:21%"><col style="width:20%"></colgroup>
     <thead><tr><th>ZEITRAUM</th><th>WETTER</th><th>TEMPERATUR</th><th>NIEDERSCHLAG</th><th>WIND / BÖEN</th></tr></thead>
     <tbody>
     {% for row in today %}

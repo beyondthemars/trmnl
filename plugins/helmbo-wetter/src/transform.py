@@ -49,6 +49,26 @@ def bft(value):
     return bisect.bisect_right(THRESHOLDS, value) if number(value) is not None and value >= 0 else None
 
 
+DIRECTIONS = ('N', 'NNO', 'NO', 'ONO', 'O', 'OSO', 'SO', 'SSO',
+              'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW')
+
+
+def compass(degrees):
+    """16 German cardinal points; the bearing indicates where wind comes from."""
+    return DIRECTIONS[int((degrees % 360 + 11.25) // 22.5) % 16] if number(degrees) is not None else '–'
+
+
+def representative_direction(degrees, speeds):
+    """Speed-weighted circular mean, accounting for 0/360 degrees wrapping."""
+    if not degrees or not speeds or len(degrees) != len(speeds):
+        return None
+    north = sum(speed * math.cos(math.radians(deg)) for deg, speed in zip(degrees, speeds))
+    east = sum(speed * math.sin(math.radians(deg)) for deg, speed in zip(degrees, speeds))
+    if math.hypot(north, east) < 0.01:
+        return None
+    return math.degrees(math.atan2(east, north)) % 360
+
+
 def latest_sample(document, parameter, now, max_age=7200):
     candidates = []
     for feature in document.get('features', []):
@@ -68,7 +88,7 @@ PLACES = {
     'Nordby': (55.446, 8.397),
     'Blåvand': (55.555, 8.13),
 }
-FIELDS = 'temperature_2m', 'precipitation', 'cloud_cover', 'wind_speed_10m', 'wind_gusts_10m'
+FIELDS = 'temperature_2m', 'precipitation', 'cloud_cover', 'wind_speed_10m', 'wind_gusts_10m', 'wind_direction_10m'
 MODEL = 'dmi_harmonie_arome_europe'
 
 
@@ -115,15 +135,16 @@ def window(rows, start, end, label, detail, alternate=None):
         cloud = interval(source, start, end, FIELDS[2])
         wind = interval(source, start, end, FIELDS[3])
         gust = interval(source, start, end, FIELDS[4])
-        return temp, rain, cloud, wind, gust
+        direction = interval(source, start, end, FIELDS[5])
+        return temp, rain, cloud, wind, gust, direction
 
-    temp, rain, cloud, wind, gust = data(rows)
+    temp, rain, cloud, wind, gust, direction = data(rows)
     mixed = False
-    if alternate and not all((temp, rain, cloud)):
+    if alternate and not all((temp, rain, cloud, wind, gust, direction)):
         replacement = data(alternate)
-        primary = temp, rain, cloud, wind, gust
+        primary = temp, rain, cloud, wind, gust, direction
         mixed = any(not original and fallback for original, fallback in zip(primary, replacement))
-        temp, rain, cloud, wind, gust = (original or fallback for original, fallback in zip(primary, replacement))
+        temp, rain, cloud, wind, gust, direction = (original or fallback for original, fallback in zip(primary, replacement))
     # At the forecast horizon the final midnight precipitation can be missing.
     return dict(
         label=label, detail=detail, mixed=mixed,
@@ -132,8 +153,9 @@ def window(rows, start, end, label, detail, alternate=None):
         sky=('Niederschlag' if rain and sum(rain) >= .1 else
              ('Klar' if sum(cloud)/len(cloud) < 25 else
               'Wolkig' if sum(cloud)/len(cloud) < 75 else 'Bedeckt') if cloud else '–'),
-        wind=f'{bft(max(wind))} / {bft(max(gust))} Bft' if wind and gust else '–',
-        incomplete=not all((temp, rain, cloud)),
+        wind=(f'{bft(max(wind))} / {bft(max(gust))} Bft · '
+              f'{compass(representative_direction(direction, wind))}' if wind and gust else '–'),
+        incomplete=not all((temp, rain, cloud, wind, gust, direction)),
     )
 
 
@@ -158,9 +180,10 @@ def build(raw, now, place='Rindby Strand'):
     values = current(doc, now)
     sources = []
     observed_fields = {'temperature_2m': 'temp_dry', 'relative_humidity_2m': 'humidity',
-                       'wind_speed_10m': 'wind_speed', 'wind_gusts_10m': 'wind_max'}
+                       'wind_speed_10m': 'wind_speed', 'wind_gusts_10m': 'wind_max',
+                       'wind_direction_10m': 'wind_dir'}
     values = {key: number(values.get(key)) for key in observed_fields}
-    if any(values[key] is None for key in ('temperature_2m', 'wind_speed_10m', 'wind_gusts_10m')):
+    if any(values[key] is None for key in ('temperature_2m', 'wind_speed_10m', 'wind_gusts_10m', 'wind_direction_10m')):
         for name, label in [('nordby', 'Nordby'), ('blavand', 'Blåvandshuk')]:
             used = False
             for key, parameter in observed_fields.items():
@@ -170,7 +193,9 @@ def build(raw, now, place='Rindby Strand'):
                     used = True
             if used:
                 sources.append(label)
-    temp, rh, wind, gust = (values[k] for k in observed_fields)
+    temp, rh, wind, gust, direction = (values[k] for k in observed_fields)
+    if wind is not None and wind < 0.3:
+        direction = None
     model_current = current(doc, now)
     if any(model_current.get(key) is not None for key in ('temperature_2m', 'wind_speed_10m', 'wind_gusts_10m')):
         sources.insert(0, f'DMI-Modell {place}')
@@ -195,12 +220,13 @@ def build(raw, now, place='Rindby Strand'):
     ebb, ebb_day = tide_time(raw.get('tide', {}), 'minimum', now)
     flood, flood_day = tide_time(raw.get('tide', {}), 'maximum', now)
     missing = [label for label, value in [('Temperatur', temp), ('Gefühlt', feels),
-               ('Wind', bft(wind)), ('Böen', bft(gust)), ('Wasser', water),
+               ('Wind', bft(wind)), ('Böen', bft(gust)), ('Windrichtung', direction), ('Wasser', water),
                ('Niederschlag', rain4 or None), ('Ebbe', ebb if ebb != '–' else None),
                ('Flut', flood if flood != '–' else None)] if value is None]
     missing.extend(row['label'] for row in today+days if row['incomplete'])
     return dict(place=place, updated=here.strftime('%d.%m. · %H:%M'), today=today, days=days,
                 temp=fmt(temp), feels=fmt(feels), wind=fmt(bft(wind),0), gust=fmt(bft(gust),0),
+                wind_dir=compass(direction), wind_deg=round(direction) if number(direction) is not None else None,
                 rain=fmt(sum(rain4)) if rain4 else '–', rain_label=rain_label,
                 water=fmt(water), water_time=water_time, ebb=ebb, ebb_day=ebb_day, flood=flood, flood_day=flood_day,
                 current_source=' + '.join(sources) or 'Aktuell keine Wetterdaten',
