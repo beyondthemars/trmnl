@@ -1,0 +1,6 @@
+---
+name: Muellkalender Kiel
+strategy: webhook
+refresh_interval: 60
+no_screen_padding: 'no'
+dark_mode: 'no'
