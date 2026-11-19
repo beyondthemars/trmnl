@@ -1,51 +1,46 @@
-# TRMNL Müllkalender Kiel
+# TRMNL Müllkalender – ABK Kiel
 
-Monochromer Müllkalender für ein kleines E-Ink-Display: nächste Leerung von Restmüll (schwarz), Papier (blau), Bio (braun) und Gelbem Sack. Jeweils mit deutschem Wochentag, Datum und Resttagen. Die zuerst anstehende Abholung ist hervorgehoben.
+Eigenständiges Schwarz-Weiß-Plugin für das 4,2-Zoll-E-Ink-CrowPanel. Zeigt die nächste Restmüll-, Papier-, Bio- und Gelber-Sack-Leerung, sortiert nach dem nächsten Termin. Je Zeile erscheinen Wochentag, Datum und Countdown; die nächste Abholung wird hervorgehoben.
 
-**Datenfluss:** ABK Kiel / Remondis → [Waste Collection Schedule](https://github.com/mampfes/hacs_waste_collection_schedule) in Home Assistant → Home-Assistant-Kalender → lokaler REST-Befehl → TRMNL-Webhook. Home Assistant muss dafür **nicht** aus dem Internet erreichbar sein.
+**Keine Home-Assistant-Installation, kein eigener Server und kein Webhook erforderlich.**
 
-## Installation
+## Funktionsweise
 
-1. In TRMNL ein privates Plugin mit **Webhook**-Strategie importieren. Die Dateien in [src](src) heißen `settings.yml` und `full.liquid`; alternativ beides als flaches ZIP verpacken und über **Plugins → Private Plugins → Import new** importieren.
-2. [Waste Collection Schedule](https://github.com/mampfes/hacs_waste_collection_schedule) in Home Assistant installieren (HACS). Über **Einstellungen → Geräte & Dienste → Integration hinzufügen** den Anbieter **Abfallwirtschaftsbetrieb Kiel (ABK)** auswählen (`abki_de`). Die eigene Straße und Hausnummer **nur lokal** hinterlegen. Als Kalendernamen **ABK Kiel** wählen und die Entity-ID kontrollieren: erwartet wird `calendar.abk_kiel`.
-3. Falls du statt GUI YAML nutzt, kannst du dies **lokal** in deiner `configuration.yaml` hinterlegen (nicht parallel zur GUI-Konfiguration):
+1. TRMNL pollt das ABK-Straßenverzeichnis anhand des in den Plugin-Einstellungen angegebenen Straßennamens.
+2. [src/transform.js](src/transform.js) läuft als TRMNL Serverless Node.js (20) und fragt die Hausnummern, Kalender-ID und ABK-iCalendar-Datei ab. Im Dezember wird zusätzlich das Folgejahr abgefragt.
+3. Das Script ermittelt jeweils den nächsten tatsächlichen Termin und gibt kompakte Variablen für [src/full.liquid](src/full.liquid) zurück.
+4. Refresh alle **12 Stunden** (`refresh_interval: 720`) oder manuell per **Force Refresh**.
 
-   ```yaml
-   waste_collection_schedule:
-     sources:
-       - name: abki_de
-         args:
-           street: DEINE_STRASSE
-           number: "DEINE_HAUSNUMMER"
-         calendar_title: ABK Kiel
-   ```
+Der ABK veröffentlicht auch die Abholtermine der Gelben Tonnen/Säcke durch Remondis. Feiertagsverschiebungen stammen aus den offiziellen iCalendar-Einträgen. Keine Rhythmus-Schätzung.
 
-4. In der **lokalen** Home-Assistant-Datei `secrets.yaml` hinterlegen:
+## Import und erster Test
 
-   ```yaml
-   trmnl_muellkalender_webhook_url: DEINE_EXAKTE_TRMNL_WEBHOOK_URL
-   ```
+1. TRMNL → **Plugins → Private Plugins → Import new** öffnen und ein **flaches ZIP** aus `src/settings.yml`, `src/full.liquid`, `src/transform.js` importieren (ohne Unterordner).
+2. In den Plugin-Einstellungen **Straße** und **Hausnummer** für deinen Behälterstandort eintragen. Die Werte gehören **nur in TRMNL**, nicht ins öffentliche GitHub-Repository.
+3. Prüfen: Strategie = **Polling**, Serverless Language = **Node**. Die Polling-URL muss auf `abki.de/abki-services/strassennamen` zeigen und den Platzhalter `{{ street | url_encode }}` enthalten.
+4. Speichern und **Force Refresh** betätigen. Unter **Edit Markup → Your Variables** sollten `bins`, `next_days` und `generated_at` erscheinen.
+5. **Full**-Vorschau prüfen, dann das Plugin in die Playlist aufnehmen. Bei Problemen die **Debug Logs** in den Plugin-Einstellungen aktivieren.
 
-   Die URL steht in den Einstellungen deines TRMNL-Plugins. **Nicht** ins öffentliche Repo committen.
+### Fehlermeldungen
 
-5. Den Inhalt von [homeassistant/rest_commands.yaml](homeassistant/rest_commands.yaml) in die **bestehende** `rest_commands.yaml` **anhängen**, den Inhalt von [homeassistant/automations.yaml](homeassistant/automations.yaml) in die **bestehende** `automations.yaml` **anhängen**. Nicht die gesamten Dateien ersetzen. In `configuration.yaml` sind bereits die entsprechenden `!include`-Anweisungen erforderlich. Stimmen die Entity-IDs nicht, `calendar.abk_kiel` in allen drei Vorkommen anpassen.
-6. Konfiguration überprüfen, Home Assistant neu starten und die Automation **TRMNL Müllkalender: ABK-Termine senden** einmal manuell ausführen.
+- `Bitte Straße und Hausnummer ...`: Beide Formfelder sind noch leer.
+- `Straße nicht im ABK-Verzeichnis`: Schreibweise oder die Polling-Antwort überprüfen.
+- `Hausnummer ... nicht hinterlegt`: Adresse auf der offiziellen ABK-Seite überprüfen, möglicherweise abweichender Behälterstandort.
+- `Zeitlimit überschritten`: Die dreistufige ABK-Abfrage war für das 5-Sekunden-Limit von TRMNL Serverless zu langsam.
+- `Kein Termin`: Für diese Fraktion enthalten die abgefragten Daten keinen künftigen Termin; nichts wird geraten.
 
-## Betrieb
+## GitHub-Synchronisierung
 
-Home Assistant fragt mit `calendar.get_events` den Kalender für 90 Tage ab. Die Automation sendet um **06:10**, **12:10** sowie nach einem Neustart von Home Assistant die nächsten vier Abholtermine an TRMNL. Bei einem leeren Kalender findet kein Push statt. Fehlt eine Müllart in den ermittelten Terminen, wird **Kein Termin** angezeigt.
+Repository `beyondthemars/trmnl`, **Folder in the repository** = `plugins/muellkalender`. TRMNL liest dann Änderungen unter `plugins/muellkalender/src/` und bietet den manuellen Import an.
 
-Die ABK-Quelle enthält auch die Gelbe Tonne/den Gelben Sack (Remondis) und berücksichtigt Feiertage. Betriebliche Ausfälle werden nicht live bestätigt. Event-Namen werden anhand der Textteile `rest`, `papier`, `bio` und `gelb` erkannt. Die Home-Assistant-Zeitzone sollte `Europe/Berlin` sein.
+## Teststatus
 
-**Wichtig:** Bei der Entwicklung konnten die konkreten Live-Leerungstermine für eine Adresse nicht online verifiziert werden. Es werden **keine** mutmaßlichen Leerungstage oder Intervalle als echte Daten eingesetzt.
+Das Serverless-Script wurde lokal mit nachgebildeten ABK-Antworten gegen Termine, iCalendar-Zeilenfaltung, Fraktionserkennung, Jahreswechsel und ungültige Adressauswahl getestet. **Ein vollständiger Live-Test auf der TRMNL-Plattform steht noch aus.**
 
-## GitHub-Sync
-
-Beim Verknüpfen in TRMNL für dieses Repository im Feld **Folder in the repository** den Ordner `plugins/muellkalender` wählen. TRMNL speichert die Plugin-Dateien dann unter `plugins/muellkalender/src/` und kann neue GitHub-Änderungen zum manuellen Import anbieten. Die `homeassistant/`-Dateien gehören zur Dokumentation und werden nicht von TRMNL importiert.
-
-## Offizielle Dokumentation
+## Links
 
 - [ABK Kiel – Leerungstermine](https://www.abki.de/dienste/entsorgung-und-recycling/beh%C3%A4lter/leerungstermine.html)
-- [Waste Collection Schedule – ABK Kiel](https://github.com/mampfes/hacs_waste_collection_schedule/blob/master/doc/source/abki_de.md)
-- [TRMNL – Plugin-ZIP-Import](https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins)
+- [Waste Collection Schedule – ABK-Implementierung](https://github.com/mampfes/hacs_waste_collection_schedule/blob/master/custom_components/waste_collection_schedule/waste_collection_schedule/source/abki_de.py)
+- [TRMNL – Serverless](https://help.trmnl.com/en/articles/14130649-serverless)
+- [TRMNL – Plugin ZIP-Import](https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins)
 - [TRMNL – GitHub Sync](https://help.trmnl.com/en/articles/15977899-github-sync)
