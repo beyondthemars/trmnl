@@ -1,86 +1,29 @@
-<style>
-  .mc-layout {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    gap: 8px;
-    color: #111;
-    background: #fff;
-    font-family: Inter, Arial, sans-serif;
-  }
-  .mc-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; flex: 0 0 auto; }
-  .mc-title { margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -1px; line-height: 1.02; }
-  .mc-location { text-align: right; font-size: 16px; font-weight: 600; line-height: 1.15; white-space: nowrap; }
-  .mc-divider { height: 3px; background: #111; flex: 0 0 auto; }
-  .mc-list { display: flex; flex-direction: column; flex: 1 1 auto; gap: 6px; min-height: 0; }
-  .mc-row { display: flex; align-items: center; gap: 13px; flex: 1 1 0; min-height: 0; padding: 7px 12px; border: 2px solid #111; border-radius: 8px; }
-  .mc-row.is-next { border-width: 3px; background: #ededed; }
-  .mc-bin { position: relative; width: 37px; height: 39px; flex: 0 0 37px; }
-  .mc-bin-lid { position: absolute; top: 3px; left: 2px; width: 33px; height: 6px; border: 2px solid #111; border-radius: 2px; background: #fff; }
-  .mc-bin-lid:before { content: ''; position: absolute; width: 13px; height: 4px; left: 8px; top: -6px; background: #111; }
-  .mc-bin-body { position: absolute; top: 10px; left: 5px; width: 27px; height: 27px; border: 2px solid #111; border-radius: 1px 1px 5px 5px; overflow: hidden; }
-  .mc-bin--rest .mc-bin-body { background: #111; }
-  .mc-bin--paper .mc-bin-body { background: repeating-linear-gradient(0deg, #fff 0px, #fff 5px, #111 5px, #111 7px); }
-  .mc-bin--bio .mc-bin-body { background: repeating-linear-gradient(135deg, #fff 0px, #fff 4px, #111 4px, #111 7px); }
-  .mc-bin--yellow .mc-bin-body { background: radial-gradient(#111 1.6px, #fff 2.1px) 0 0 / 8px 8px; }
-  .mc-info { flex: 1 1 auto; min-width: 0; }
-  .mc-name { display: block; font-size: 23px; font-weight: 800; line-height: 1.05; white-space: nowrap; }
-  .mc-sub { display: block; font-size: 13px; font-weight: 500; line-height: 1.15; margin-top: 3px; }
-  .mc-right { text-align: right; flex: 0 0 auto; min-width: 110px; }
-  .mc-date { display: block; font-size: 24px; line-height: 1.05; font-weight: 800; white-space: nowrap; }
-  .mc-relative { display: block; font-size: 15px; line-height: 1.2; font-weight: 700; margin-top: 3px; white-space: nowrap; }
-  .mc-row.is-next .mc-relative { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-  .mc-empty { margin: auto; text-align: center; font-size: 22px; font-weight: 700; }
-  .mc-error { margin: auto; text-align: center; font-size: 19px; font-weight: 700; max-width: 95%; line-height: 1.3; overflow-wrap: anywhere; }
-  .mc-footer { flex: 0 0 auto; font-size: 11px; line-height: 1; text-align: right; font-weight: 500; }
-  @media (max-width: 480px), (max-height: 330px) {
-    .mc-layout { gap: 4px; }
-    .mc-title { font-size: 23px; letter-spacing: -.6px; }
-    .mc-location { font-size: 12px; }
-    .mc-divider { height: 2px; }
-    .mc-list { gap: 4px; }
-    .mc-row { gap: 7px; padding: 3px 7px; border-width: 1.5px; border-radius: 5px; }
-    .mc-row.is-next { border-width: 2px; }
-    .mc-bin { transform: scale(.75); transform-origin: left center; flex-basis: 28px; width: 28px; }
-    .mc-name { font-size: 16px; }
-    .mc-sub { font-size: 10px; margin-top: 1px; }
-    .mc-right { min-width: 91px; }
-    .mc-date { font-size: 16px; }
-    .mc-relative { font-size: 12px; margin-top: 1px; }
-    .mc-footer { font-size: 9px; }
-  }
-</style>
-<div class="layout mc-layout">
-  <div class="mc-header">
-    <h1 class="mc-title">MÜLLKALENDER</h1>
-    <div class="mc-location">Kiel · ABK</div>
+<div class="layout mc mc--full">
+  <div class="mc-head">
+    <h1 class="mc-heading">MÜLLKALENDER</h1>
+    <span class="mc-location">ABK Kiel</span>
   </div>
-  <div class="mc-divider"></div>
   {% if error and error != "" %}
-  <div class="mc-error">{{ error }}</div>
+    <div class="mc-message">{{ error }}</div>
   {% elsif bins and bins.size > 0 %}
-  <div class="mc-list">
-    {% for bin in bins %}
-    <div class="mc-row{% if bin.days == next_days %} is-next{% endif %}">
-      <div class="mc-bin mc-bin--{{ bin.id }}" aria-hidden="true">
-        <div class="mc-bin-lid"></div><div class="mc-bin-body"></div>
-      </div>
-      <div class="mc-info">
-        <span class="mc-name">{{ bin.label }}</span>
-        <span class="mc-sub">{% case bin.id %}{% when 'rest' %}Schwarze Tonne{% when 'paper' %}Blaue Tonne{% when 'bio' %}Braune Tonne{% when 'yellow' %}Gelber Sack{% endcase %}</span>
-      </div>
-      <div class="mc-right">
-        <span class="mc-date">{{ bin.weekday }}{% if bin.weekday != '' %}, {% endif %}{{ bin.date }}</span>
-        <span class="mc-relative">{{ bin.relative }}</span>
-      </div>
+    <div class="mc-grid">
+      {% for bin in bins %}
+        <div class="mc-card{% if bin.days == next_days %} is-next{% endif %}">
+          <div class="mc-icon mc-icon--{{ bin.id }}" aria-hidden="true"><div class="mc-icon-inner"></div></div>
+          <div class="mc-info">
+            <span class="mc-type">{{ bin.label }}</span>
+            <span class="mc-detail">{% case bin.id %}{% when 'rest' %}Schwarze Tonne{% when 'paper' %}Blaue Tonne{% when 'bio' %}Braune Tonne{% when 'yellow' %}Leichtverpackungen{% endcase %}</span>
+          </div>
+          <div class="mc-right">
+            <span class="mc-date">{{ bin.weekday }}{% if bin.weekday != "" %}, {% endif %}{{ bin.date }}</span>
+            <span class="mc-relative">{{ bin.relative }}</span>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
   {% else %}
-  <div class="mc-empty">Keine ABK-Abholtermine vorhanden</div>
+    <div class="mc-message">Keine Abholtermine vorhanden.</div>
   {% endif %}
-  <div class="mc-footer">Daten: ABK / Remondis · automatisch{% if generated_at %} · Stand {{ generated_at }}{% endif %}</div>
+  <div class="mc-footer">ABK Kiel / Remondis{% if generated_at %} · Stand {{ generated_at }} Uhr{% endif %}</div>
 </div>
 <div class="title_bar"><span class="title">Müllkalender</span><span class="instance">Kiel</span></div>
