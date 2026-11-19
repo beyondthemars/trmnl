@@ -114,6 +114,29 @@ def current(doc, now):
     return values if stamp is not None and 0 <= now-stamp <= 3600 else {}
 
 
+def probabilities(doc):
+    """Precipitation probability per preceding hour from Open-Meteo Best Match."""
+    hourly = doc.get('hourly', {})
+    stamps = hourly.get('time', [])
+    values = hourly.get('precipitation_probability', [])
+    return {
+        stamp: {'precipitation_probability': number(values[i])}
+        for i, stamp in enumerate(stamps)
+        if number(stamp) is not None and i < len(values)
+        and number(values[i]) is not None and 0 <= values[i] <= 100
+    }
+
+
+def sun_times(doc, day):
+    """Today's local sunrise and sunset. Unix timestamps include the time zone offset."""
+    daily = doc.get('daily', {})
+    for rise, setting in zip(daily.get('sunrise', []), daily.get('sunset', [])):
+        start, end = epoch(rise), epoch(setting)
+        if start is not None and end is not None and local_datetime(start).date() == day:
+            return local_datetime(start).strftime('%H:%M'), local_datetime(end).strftime('%H:%M')
+    return '–', '–'
+
+
 def boundary(day, hour):
     wall = dt.datetime.combine(day, dt.time(), dt.timezone.utc) + dt.timedelta(hours=hour)
     # The displayed date boundaries are 00:00, 06:00, 12:00 and 18:00.
@@ -128,7 +151,7 @@ def interval(rows, start, end, key, trailing=False):
     return values if values and all(value is not None for value in values) else []
 
 
-def window(rows, start, end, label, detail, alternate=None):
+def window(rows, start, end, label, detail, alternate=None, probability=None):
     def data(source):
         temp = interval(source, start, end, FIELDS[0])
         rain = interval(source, start, end, FIELDS[1], trailing=True)
@@ -145,11 +168,15 @@ def window(rows, start, end, label, detail, alternate=None):
         primary = temp, rain, cloud, wind, gust, direction
         mixed = any(not original and fallback for original, fallback in zip(primary, replacement))
         temp, rain, cloud, wind, gust, direction = (original or fallback for original, fallback in zip(primary, replacement))
+    # Probability covers the preceding hour, just like Open-Meteo precipitation.
+    # Max per hour is NOT the chance of any rain over the whole 6/24-hour window.
+    chances = interval(probability or {}, start, end, 'precipitation_probability', trailing=True)
+    rain_text = f'{fmt(sum(rain)) if rain else "–"} mm · {fmt(max(chances), 0) if chances else "–"} %'
     # At the forecast horizon the final midnight precipitation can be missing.
     return dict(
         label=label, detail=detail, mixed=mixed,
         temp=f'{fmt(min(temp), 0)} bis {fmt(max(temp), 0)} °C' if temp else '–',
-        rain=f'{fmt(sum(rain))} mm' if rain else '–',
+        rain=rain_text, chance_available=bool(chances),
         sky=('Niederschlag' if rain and sum(rain) >= .1 else
              ('Klar' if sum(cloud)/len(cloud) < 25 else
               'Wolkig' if sum(cloud)/len(cloud) < 75 else 'Bedeckt') if cloud else '–'),
@@ -177,6 +204,8 @@ def build(raw, now, place='Rindby Strand'):
     day = here.date()
     doc = raw.get('model', {})
     rows, alternate = hours(doc), hours(raw.get('extended', {}))
+    chance_rows = probabilities(raw.get('chance_sun', {}))
+    sunrise, sunset = sun_times(raw.get('chance_sun', {}), day)
     values = current(doc, now)
     sources = []
     observed_fields = {'temperature_2m': 'temp_dry', 'relative_humidity_2m': 'humidity',
@@ -206,7 +235,8 @@ def build(raw, now, place='Rindby Strand'):
     rain4 = interval(rows, start, start+4*3600, 'precipitation', trailing=True)
     # The four hourly bins begin at the current full hour.
     rain_label = local_datetime(start).strftime('%H:%M') + '–' + local_datetime(start+4*3600).strftime('%H:%M')
-    today = [window(rows, boundary(day, start_hour), boundary(day, end_hour), label, detail)
+    today = [window(rows, boundary(day, start_hour), boundary(day, end_hour), label, detail,
+                    probability=chance_rows)
              for start_hour, end_hour, label, detail in [(6,12,'Vormittag','06–12 Uhr'),
                                                         (12,18,'Nachmittag','12–18 Uhr'),
                                                         (18,24,'Abend','18–24 Uhr')]]
@@ -214,7 +244,7 @@ def build(raw, now, place='Rindby Strand'):
     for offset, label in [(1,'Morgen'), (2,'Übermorgen')]:
         date = day + dt.timedelta(days=offset)
         days.append(window(rows, boundary(date, 0), boundary(date, 24),
-                           label, date.strftime('%d.%m.'), alternate))
+                           label, date.strftime('%d.%m.'), alternate, probability=chance_rows))
     water_stamp, water = latest_sample(raw.get('water', {}), 'tw', now, max_age=6*3600)
     water_time = local_datetime(water_stamp).strftime('%H:%M') if water_stamp else ''
     ebb, ebb_day = tide_time(raw.get('tide', {}), 'minimum', now)
@@ -224,7 +254,10 @@ def build(raw, now, place='Rindby Strand'):
                ('Niederschlag', rain4 or None), ('Ebbe', ebb if ebb != '–' else None),
                ('Flut', flood if flood != '–' else None)] if value is None]
     missing.extend(row['label'] for row in today+days if row['incomplete'])
+    missing.extend(row['label'] + ' Regen-%' for row in today+days if not row['chance_available'])
+    missing.extend(label for label, value in [('Sonnenaufgang', sunrise), ('Sonnenuntergang', sunset)] if value == '–')
     return dict(place=place, updated=here.strftime('%d.%m. · %H:%M'), today=today, days=days,
+                sunrise=sunrise, sunset=sunset,
                 temp=fmt(temp), feels=fmt(feels), wind=fmt(bft(wind),0), gust=fmt(bft(gust),0),
                 wind_dir=compass(direction), wind_deg=round(direction) if number(direction) is not None else None,
                 rain=fmt(sum(rain4)) if rain4 else '–', rain_label=rain_label,
@@ -245,7 +278,7 @@ def document(value):
 
 def run(input):
     now = dt.datetime.now(dt.timezone.utc).timestamp()
-    names = ('rindby_model', 'nordby_model', 'blavand_model', 'nordby', 'blavand', 'water', 'tide')
+    names = ('rindby_model', 'nordby_model', 'blavand_model', 'nordby', 'blavand', 'water', 'tide', 'chance_sun')
     raw = {name: document(input.get(f'IDX_{index}')) for index, name in enumerate(names)}
     place = 'Rindby Strand'
     raw['model'] = raw['rindby_model']

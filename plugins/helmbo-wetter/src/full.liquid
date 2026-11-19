@@ -4,9 +4,15 @@
   font: 16px Arial, sans-serif; font-variant-numeric: tabular-nums; display: grid;
   grid-template-rows: 49px 119px 175px 65px 21px; }
 .fano header, .fano footer { display: flex; align-items: center; justify-content: space-between; }
-.fano header { border-bottom: 3px solid; }
+.fano header { border-bottom: 3px solid; gap: 12px; }
 .fano h1 { font-size: 32px; line-height: 1; margin: 0; font-weight: 800; }
 .fano h1 span { font-size: 19px; margin-left: 12px; font-weight: 500; }
+.fano header h1, .fano header .caps { white-space: nowrap; }
+.fano header .caps { font-size: 12px; letter-spacing: .5px; }
+.fano .sun-times { display: flex; align-items: center; gap: 13px; margin-left: auto; white-space: nowrap; }
+.fano .sun-time { display: inline-flex; gap: 4px; align-items: center; font-size: 15px; }
+.fano .sun-time svg { display: block; width: 23px; height: 23px; flex: 0 0 23px; }
+.fano .sun-time strong { font-weight: 750; }
 .fano .caps { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
 .fano .now { display: grid; grid-template-columns: 215px 315px 1fr; align-items: center; }
 .fano .now > div { padding: 0 15px; border-left: 1px solid; }
@@ -24,6 +30,7 @@
 .fano th { background: #000; color: #fff; height: 25px; font-size: 12px; }
 .fano td { font-size: 15px; height: 30px; }
 .fano td:first-child { font-weight: 750; }
+.fano td.rain-cell { font-size: 14px; letter-spacing: -.2px; }
 .fano td span { font-size: 13px; font-weight: 400; margin-left: 5px; }
 .fano .coast { display: grid; grid-template-columns: 1fr 1fr 1.25fr; align-items: center; }
 .fano .coast > div { border-left: 1px solid; padding-left: 14px; }
@@ -35,6 +42,18 @@
 <main class="fano">
   <header>
     <h1>Fanø<span>{{ place | escape }}</span></h1>
+    <div class="sun-times" aria-label="Sonnenaufgang und Sonnenuntergang">
+      <span class="sun-time" title="Sonnenaufgang" aria-label="Sonnenaufgang {{ sunrise }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 19h20 M5 16a7 7 0 0 1 14 0 M12 11V3 M8 7l4-4 4 4"/>
+        </svg><strong>{{ sunrise }}</strong>
+      </span>
+      <span class="sun-time" title="Sonnenuntergang" aria-label="Sonnenuntergang {{ sunset }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 19h20 M5 16a7 7 0 0 1 14 0 M12 3v8 M8 7l4 4 4-4"/>
+        </svg><strong>{{ sunset }}</strong>
+      </span>
+    </div>
     <div class="caps">{{ updated | escape }} Ortszeit</div>
   </header>
   <section class="now" aria-label="Aktuelles Wetter">
@@ -70,10 +89,10 @@
     <thead><tr><th>ZEITRAUM</th><th>WETTER</th><th>TEMPERATUR</th><th>NIEDERSCHLAG</th><th>WIND / BÖEN</th></tr></thead>
     <tbody>
     {% for row in today %}
-      <tr><td>{{ row.label }}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td>{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
+      <tr><td>{{ row.label }}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td class="rain-cell">{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
     {% endfor %}
     {% for row in days %}
-      <tr><td>{{ row.label }}{% if row.mixed %}*{% endif %}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td>{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
+      <tr><td>{{ row.label }}{% if row.mixed %}*{% endif %}<span>{{ row.detail }}</span></td><td>{{ row.sky }}</td><td>{{ row.temp }}</td><td class="rain-cell">{{ row.rain }}</td><td>{{ row.wind }}</td></tr>
     {% endfor %}
     </tbody>
   </table>
@@ -82,5 +101,5 @@
     <div><div class="caps">Nächste Flut · Nordby</div><strong>{{ flood }}</strong><small>{{ flood_day }}</small></div>
     <div><div class="caps">Wasser · Esbjerg Havn</div><strong>{{ water }} °C</strong>{% if water_time %}<small>{{ water_time }} Uhr</small>{% endif %}</div>
   </section>
-  <footer><span>{{ current_source | escape }} · DMI-Gezeiten{% if mixed %} · * Modellmix{% endif %}</span><span>{% if missing.size > 0 %}Datenlücken{% else %}DMI / Open-Meteo{% endif %}</span></footer>
+  <footer><span>{{ current_source | escape }} · DMI-Gezeiten{% if mixed %} · * Modellmix{% endif %}</span><span>Regen-%: max. Stunde · {% if missing.size > 0 %}Datenlücken{% else %}DMI/Open-Meteo{% endif %}</span></footer>
 </main>
