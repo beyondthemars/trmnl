@@ -1,0 +1,119 @@
+<style>
+/* Universelle TRMNL-Ansichten: OG 800x480, X 1040x780 (logisch), X Portrait und Mashups.
+   TRMNL stellt die umgebenden screen/view-Elemente und deren Layoutgroessen bereit. */
+.layout.mc {
+  display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start;
+  width:100%; height:100%; min-width:0; min-height:0; padding:0;
+  margin:0; overflow:hidden; gap:7px; background:#fff; color:#111;
+  font-family:Inter,Arial,sans-serif;
+}
+.mc, .mc * { box-sizing:border-box; }
+.mc-head { flex:0 0 auto; display:flex; align-items:flex-end; justify-content:space-between; gap:10px; min-width:0; padding:0 2px 4px; border-bottom:3px solid #111; }
+.mc-heading { margin:0; padding:0; font-size:29px; line-height:1.07; letter-spacing:-.6px; font-weight:850; white-space:nowrap; }
+.mc-location { font-size:14px; line-height:1.1; font-weight:650; white-space:nowrap; text-align:right; }
+.mc-grid { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:1fr; grid-template-rows:repeat(4,minmax(0,1fr)); gap:6px; }
+.mc-card { display:flex; align-items:center; min-width:0; min-height:0; overflow:hidden; gap:12px; padding:5px 12px; border:2px solid #111; border-radius:7px; }
+.mc-card.is-next { border-width:3px; background:#eaeaea; }
+.mc-icon { display:block; position:relative; flex:0 0 39px; width:39px; height:42px; }
+.mc-icon:before { content:''; position:absolute; left:2px; top:6px; width:35px; height:7px; border:2px solid #111; border-radius:2px; background:#fff; }
+.mc-icon:after { content:''; position:absolute; left:13px; top:1px; width:13px; height:5px; background:#111; }
+.mc-icon-inner { position:absolute; top:15px; left:5px; width:29px; height:26px; border:2px solid #111; border-radius:1px 1px 4px 4px; }
+.mc-icon--rest .mc-icon-inner { background:#111; }
+.mc-icon--paper .mc-icon-inner { background:repeating-linear-gradient(0deg,#fff 0 5px,#111 5px 7px); }
+.mc-icon--bio .mc-icon-inner { background:repeating-linear-gradient(135deg,#fff 0 4px,#111 4px 7px); }
+.mc-icon--yellow .mc-icon-inner { background:radial-gradient(#111 1.5px,#fff 2.1px) 0 0/8px 8px; }
+.mc-info { flex:1 1 auto; min-width:0; }
+.mc-type { display:block; margin:0; font-size:23px; line-height:1.12; font-weight:800; white-space:nowrap; }
+.mc-detail { display:block; font-size:12px; line-height:1.1; margin-top:3px; white-space:nowrap; }
+.mc-right { flex:0 0 auto; min-width:123px; text-align:right; }
+.mc-date { display:block; font-size:23px; line-height:1.05; font-weight:800; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.mc-relative { display:block; font-size:14px; line-height:1.13; margin-top:3px; font-weight:700; white-space:nowrap; }
+.mc-card.is-next .mc-relative { text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:2px; }
+.mc-footer { flex:0 0 auto; padding:0 2px; font-size:11px; line-height:1.1; text-align:right; white-space:nowrap; }
+.mc-message { margin:auto; padding:10px; font-size:19px; line-height:1.25; font-weight:700; text-align:center; overflow-wrap:anywhere; }
+
+/* X: mehr nutzbarer Platz, deutlich groessere Beschriftungen; auch im Hochformat. */
+.screen--v2 .mc--full { gap:13px; }
+.screen--v2 .mc--full .mc-head { border-bottom-width:4px; padding-bottom:12px; }
+.screen--v2 .mc--full .mc-heading { font-size:43px; }
+.screen--v2 .mc--full .mc-location { font-size:21px; }
+.screen--v2 .mc--full .mc-grid { gap:12px; }
+.screen--v2 .mc--full .mc-card { padding:12px 22px; gap:22px; border-radius:12px; border-width:3px; }
+.screen--v2 .mc--full .mc-card.is-next { border-width:4px; }
+.screen--v2 .mc--full .mc-icon { transform:scale(1.4); transform-origin:center; flex-basis:58px; }
+.screen--v2 .mc--full .mc-type { font-size:33px; }
+.screen--v2 .mc--full .mc-detail { font-size:17px; margin-top:6px; }
+.screen--v2 .mc--full .mc-date { font-size:35px; }
+.screen--v2 .mc--full .mc-right { min-width:210px; }
+.screen--v2 .mc--full .mc-relative { font-size:21px; margin-top:5px; }
+.screen--v2 .mc--full .mc-footer { font-size:14px; }
+
+/* TRMNL X kann den Bildschirminhalt im Hochformat ausgeben. */
+.screen--portrait .mc--full .mc-head { align-items:flex-start; flex-direction:column; gap:6px; }
+.screen--portrait .mc--full .mc-location { text-align:left; }
+.screen--v2.screen--portrait .mc--full .mc-heading { font-size:46px; }
+.screen--v2.screen--portrait .mc--full .mc-grid { gap:18px; }
+.screen--v2.screen--portrait .mc--full .mc-card { padding:20px 22px; }
+.screen--v2.screen--portrait .mc--full .mc-type { font-size:36px; }
+.screen--v2.screen--portrait .mc--full .mc-date { font-size:34px; }
+
+/* Mashup: zwei Spalten passen gut in die horizontalen und quadratischen Ansichten. */
+.mc--half-h, .mc--half-v, .mc--quadrant { gap:5px; }
+.mc--half-h .mc-head, .mc--half-v .mc-head, .mc--quadrant .mc-head { padding-bottom:4px; border-bottom-width:2px; }
+.mc--half-h .mc-heading, .mc--half-v .mc-heading, .mc--quadrant .mc-heading { font-size:18px; }
+.mc--half-h .mc-location, .mc--half-v .mc-location, .mc--quadrant .mc-location { font-size:11px; }
+.mc--half-h .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:5px; }
+.mc--half-h .mc-card { gap:6px; padding:3px 7px; border-radius:5px; border-width:1.5px; }
+.mc--half-h .mc-card.is-next { border-width:2px; }
+.mc--half-h .mc-icon { transform:scale(.65); flex-basis:26px; transform-origin:left center; }
+.mc--half-h .mc-type { font-size:16px; }
+.mc--half-h .mc-detail { font-size:10px; margin-top:1px; }
+.mc--half-h .mc-right { min-width:90px; }
+.mc--half-h .mc-date { font-size:16px; }
+.mc--half-h .mc-relative { font-size:12px; margin-top:1px; }
+
+.mc--half-v .mc-grid { gap:5px; }
+.mc--half-v .mc-card { gap:6px; padding:3px 7px; border-radius:5px; border-width:1.5px; }
+.mc--half-v .mc-card.is-next { border-width:2px; }
+.mc--half-v .mc-icon { transform:scale(.65); flex-basis:26px; transform-origin:left center; }
+.mc--half-v .mc-type { font-size:16px; }
+.mc--half-v .mc-detail { font-size:10px; margin-top:1px; }
+.mc--half-v .mc-right { min-width:89px; }
+.mc--half-v .mc-date { font-size:16px; }
+.mc--half-v .mc-relative { font-size:12px; margin-top:1px; }
+
+.mc--quadrant .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); gap:4px; }
+.mc--quadrant .mc-card { align-items:flex-start; justify-content:center; flex-direction:column; gap:3px; padding:4px 7px; border-radius:4px; border-width:1.5px; }
+.mc--quadrant .mc-card.is-next { border-width:2px; }
+.mc--quadrant .mc-icon,.mc--quadrant .mc-detail { display:none; }
+.mc--quadrant .mc-type { font-size:14px; }
+.mc--quadrant .mc-right { min-width:0; text-align:left; }
+.mc--quadrant .mc-date { font-size:15px; }
+.mc--quadrant .mc-relative { font-size:11px; margin-top:1px; }
+.mc--half-h .mc-message, .mc--half-v .mc-message, .mc--quadrant .mc-message { font-size:13px; padding:4px; }
+
+/* Die X hat auch in Mashups mehr logische Pixel. */
+.screen--v2 .mc--half-h .mc-heading,
+.screen--v2 .mc--half-v .mc-heading,
+.screen--v2 .mc--quadrant .mc-heading { font-size:22px; }
+.screen--v2 .mc--half-h .mc-card,
+.screen--v2 .mc--half-v .mc-card,
+.screen--v2 .mc--quadrant .mc-card { border-radius:7px; }
+.screen--v2 .mc--half-h .mc-type,.screen--v2 .mc--half-v .mc-type { font-size:20px; }
+.screen--v2 .mc--half-h .mc-date,.screen--v2 .mc--half-v .mc-date { font-size:19px; }
+.screen--v2 .mc--half-h .mc-relative,.screen--v2 .mc--half-v .mc-relative { font-size:14px; }
+.screen--v2 .mc--quadrant .mc-type { font-size:19px; }
+.screen--v2 .mc--quadrant .mc-date { font-size:19px; }
+.screen--v2 .mc--quadrant .mc-relative { font-size:13px; }
+
+/* Optionale alternative Orientierungen und kleine BYOD-Fenster. */
+@media (max-width:600px) {
+  .mc--full .mc-heading { font-size:24px; }
+  .mc--full .mc-type { font-size:18px; }
+  .mc--full .mc-detail { font-size:11px; }
+  .mc--full .mc-date { font-size:19px; }
+  .mc--full .mc-right { min-width:99px; }
+  .mc--full .mc-card { gap:7px; padding:3px 7px; }
+  .mc--full .mc-icon { transform:scale(.75); transform-origin:left center; flex-basis:30px; }
+}
+</style>
