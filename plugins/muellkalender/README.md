@@ -2,18 +2,22 @@
 
 Eigenständiges, kontrastreiches E-Ink-Plugin für **TRMNL OG und TRMNL X**, ohne Home Assistant und ohne eigenen Server. Es zeigt für Restmüll, Papier, Bioabfall und Gelben Sack jeweils den nächsten offiziellen ABK-Termin, den Wochentag und die verbleibenden Tage. Die nächste Leerung ist hervorgehoben.
 
+## Gestaltung – Minimal
+
+Das Plugin verwendet ein zurückhaltendes E-Ink-Design mit viel Weißraum und klarer Typografie. Die vier Abfallarten erscheinen als schlichte Liste mit feinen Trennlinien, nicht mehr als umrahmte Karten. Die nächste Leerung wird durch eine hellgraue Fläche, eine schmale seitliche Linie und den Hinweis **„ALS NÄCHSTES“** markiert. Die Datenabfrage und Sortierung bleiben unverändert; Grautöne und Kontraste sind auch für den OG geeignet.
+
 ## Unterstützte Anzeigen
 
 | Anzeige | Internes TRMNL-Layout | Darstellung |
 |---|---:|---|
-| TRMNL OG (Querformat) | 800 × 480 | Vier große, sortierte Zeilen |
-| TRMNL X (Querformat) | 1040 × 780 (physisch 1872 × 1404) | Größere Schriften, Piktogramme und Abstände |
-| TRMNL X (Hochformat) | 780 × 1040 (physisch 1404 × 1872) | Vier großzügige, vertikale Zeilen |
-| Half horizontal | OG und X | Vier Termine in zwei Spalten |
-| Half vertical | OG und X | Vier kompakte, vertikale Zeilen |
-| Quadrant | OG und X | Vier kompakte Kacheln |
+| TRMNL OG (Querformat) | 800 × 480 | Vier ruhige Listenzeilen, Datum rechts |
+| TRMNL X (Querformat) | 1040 × 780 (physisch 1872 × 1404) | Größere Typografie und mehr Weißraum |
+| TRMNL X (Hochformat) | 780 × 1040 (physisch 1404 × 1872) | Vier großzügige vertikale Reihen |
+| Half horizontal | OG und X | Vier kompakte Termine in zwei Spalten |
+| Half vertical | OG und X | Vier schlichte Zeilen |
+| Quadrant | OG und X | Vier minimalistische Bereiche im 2×2-Raster |
 
-Alle Layouts verwenden **dieselben ABK-Daten** und dieselbe Vorlage für die Tonnenarten. Das gemeinsame CSS liegt in [src/shared.liquid](src/shared.liquid). `full.liquid` rendert die Vollbildansicht, die anderen Liquid-Dateien dienen den TRMNL-Mashups. Kein zusätzlicher Parameter zur Gerätewahl erforderlich. Das Layout bleibt bewusst kontrastreich und funktioniert auch mit den kleineren Graustufenpaletten.
+Alle Vorlagen verwenden dieselben ABK-Daten, ohne eigene Geräteversion. Das gemeinsame CSS liegt in [src/shared.liquid](src/shared.liquid), die Liquid-Markups in [src](src). Die TRMNL-Gerätekennung bestimmt die Darstellung.
 
 ## Funktionsweise
 
