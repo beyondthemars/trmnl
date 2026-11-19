@@ -1,8 +1,0 @@
-# In die bestehende rest_commands.yaml einfügen; NICHT die Datei ersetzen.
-# Die URL gehört nur in die lokale secrets.yaml, niemals ins öffentliche GitHub-Repo.
-trmnl_muellkalender:
-  url: !secret trmnl_muellkalender_webhook_url
-  method: POST
-  content_type: application/json
-  timeout: 15
-  payload: "{{ payload }}"
