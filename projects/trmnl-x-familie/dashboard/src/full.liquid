@@ -69,6 +69,22 @@
 {% assign birthday_name = first_birthday.name | default: first_birthday.title | default: first_birthday.person %}
 {% assign birthday_date = first_birthday.next_date | default: first_birthday.date | default: first_birthday.birthdate %}
 {% assign birthday_days = first_birthday.days_until | default: first_birthday.days | default: first_birthday.days_away %}
+{% assign birthday_month = birthday_date | date: "%m" %}
+{% assign birthday_month_name = "" %}
+{% case birthday_month %}
+  {% when "01" %}{% assign birthday_month_name = "Januar" %}
+  {% when "02" %}{% assign birthday_month_name = "Februar" %}
+  {% when "03" %}{% assign birthday_month_name = "März" %}
+  {% when "04" %}{% assign birthday_month_name = "April" %}
+  {% when "05" %}{% assign birthday_month_name = "Mai" %}
+  {% when "06" %}{% assign birthday_month_name = "Juni" %}
+  {% when "07" %}{% assign birthday_month_name = "Juli" %}
+  {% when "08" %}{% assign birthday_month_name = "August" %}
+  {% when "09" %}{% assign birthday_month_name = "September" %}
+  {% when "10" %}{% assign birthday_month_name = "Oktober" %}
+  {% when "11" %}{% assign birthday_month_name = "November" %}
+  {% when "12" %}{% assign birthday_month_name = "Dezember" %}
+{% endcase %}
 <div class="layout fx">
   <header class="fx__top">
     <div class="fx__date-block">
@@ -104,7 +120,7 @@
       <div class="fx__birthday-title">Geburtstage</div>
       {% if first_birthday %}
         <div class="fx__birthday-body">
-          {{ birthday_name | escape }}{% if birthday_date %} · {{ birthday_date | date: "%d. %B" }}{% endif %}
+          {{ birthday_name | escape }}{% if birthday_date %} · {{ birthday_date | date: "%d" | plus: 0 }}. {{ birthday_month_name }}{% endif %}
         </div>
       {% else %}
         <div class="fx__birthday-body">Keine Geburtstage verfügbar</div>
