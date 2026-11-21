@@ -10,12 +10,14 @@ Das Ziel ist eine **ruhige, schnell erkennbare Küchenübersicht** auf dem **TRM
 
 | Bereich | Layout | Datenherkunft |
 | --- | --- | --- |
-| Datum/Wochentag | ganz oben, groß | Zeit-/Zeitzonenwerte im TRMNL-Liquid-Template |
-| Begrüßung | rechts im Kopf | aktuelle Tageszeit und Wochentag |
+| Datum/Wochentag/Kalenderwoche | ganz oben, groß | Zeit-/Zeitzonenwerte im TRMNL-Liquid-Template |
+| Sonnenaufgang/-untergang | rechts oben, zwei Zeiten mit einfachen Icons | Open-Meteo über `weather_source.sun` |
 | Geburtstage | schmale Zeile unter dem Datum | externes Birthday-Calendar-Recipe |
 | Familienkalender | ca. 60 % der Hauptfläche, maximal sechs Termine | offizielle TRMNL-Apple-Calendar-Integration |
 | Familienwetter | obere rechte Spalte | [Wetterplugin](../wetter/README.md) |
 | Müllabfuhr | untere rechte Spalte | [separates X-Müllplugin](../muellkalender/README.md) |
+
+**Visuelle Referenz:** die vom Nutzer ausgewählte TRMNL-X-Vorschau vom 23. November 2026. Das Layout verwendet bewusst **keinen Begrüßungs- oder Familienübersichtstext rechts oben**, sondern Sonnenaufgang und Sonnenuntergang. Der Hintergrund ist weiß, Geburtstage und Regenhinweise sind hellgrau, Kalender und Müll erscheinen als ruhige Zeilen. Die Sonnenzeiten sind dynamische Daten; in den Plugin-Dateien stehen **keine fest hinterlegten Beispielzeiten**.
 
 Das Full-Layout ist in [`src/full.liquid`](src/full.liquid) enthalten; Gestaltung und Graustufen in [`src/shared.liquid`](src/shared.liquid). Die Datei [`src/settings.yml`](src/settings.yml) deklariert Plugin Merge und die vier Quell-Auswahlfelder.
 
@@ -94,7 +96,7 @@ Das eigenständige [Familienwetter-Plugin](../wetter/README.md) ruft Open-Meteo/
 - `current.temperature` – **Modellwert**, keine Ecowitt-Messung
 - `paths[]` mit `hours`, `status` und `text` für die Kitawege
 
-Wechsel der Wetterperioden **05–13**, **13–18** und **18–05 Uhr** erfolgt durch das Wetterplugin. Die Begrüßung im Dashboard läuft nach einer **eigenen** Uhrzeitlogik (darum kann der Gruß bereits „Feierabend“ heißen, während bis 18 Uhr noch Nachmittagswetter dargestellt wird).
+Die Wetterperioden **05–13**, **13–18** und **18–05 Uhr** sowie die Sonnenzeiten kommen vom selben Familienwetter-Plugin. Der Kopf zeigt `weather_source.sun.sunrise` und `weather_source.sun.sunset` als Ortszeiten (HH:MM). Fehlen Daten, erscheinen `–:–` statt erfundener Zeiten. Die Sonnenzeiten werden aus `daily.sunrise`/`daily.sunset` für das **aktuelle lokale Datum** berechnet.
 
 ### Müllkalender Familie X
 
@@ -104,20 +106,29 @@ Die [separate ABKI-Projektkopie](../muellkalender/README.md) liefert `next_two`:
 
 ## Zeitabhängiges Verhalten im Code
 
-Die Anzeige leitet Wochentag und Tageszeit in Liquid aus `now` und `trmnl.user.utc_offset` ab. Ein Realtest mit **Europe/Berlin** einschließlich Sommerzeitwechsel ist erforderlich.
+Datum, Kalenderwoche und Tagesfilter leitet das Template in Liquid aus `now` und `trmnl.user.utc_offset` ab. Die Sonnenzeiten kommen aus dem Wetterplugin, dessen Auswertung `Europe/Berlin` verwendet. Ein Realtest einschließlich Sommerzeitwechsel bleibt erforderlich.
 
-| Zeitraum | Gruß im Entwurf | Termine |
-| --- | --- | --- |
-| 05:00–07:59 | Guten Morgen | heutige Termine, soweit von der Quelle geliefert |
-| 08:00–12:59 | Unser Tag | heutige Termine |
-| 13:00–13:59 | Kita-Abholung | heutige noch relevante Termine |
-| 14:00–16:59 | Familienzeit | heutige noch relevante Termine |
-| 17:00–19:29 | Feierabend | heute und morgen |
-| ab 19:30 | Blick auf morgen | morgige Termine |
-| 00:00–04:59 | derzeit „Blick auf morgen“ | Termine des begonnenen Tages |
-| Samstag/Sonntag | Unser Wochenende (hat Vorrang) | grundsätzlich derselbe Tagesfilter |
+| Zeitraum | Kalender |
+| --- | --- |
+| 00:00–04:59 | Termine des begonnenen Tages |
+| 05:00–12:59 | heutige Termine |
+| 13:00–16:59 | heute noch relevante Termine |
+| 17:00–19:29 | heute und morgen |
+| ab 19:30 | morgige Termine |
+| Wochenende | identisches Layout, gleicher Zeitfilter |
 
-Das ist **eine gemeinsame dynamische Ansicht**, keine Sammlung von fünf separaten statischen Plugins. TRMNL aktualisiert sie beim nächsten Refresh, nicht zu jedem Minutenwechsel. Bei Gleichstand oder langen Termintiteln muss die Darstellung auf dem echten X geprüft werden.
+Die Gestaltung bleibt **zu allen Uhrzeiten gleich**: keine wechselnde Begrüßung, kein zusätzlicher Header. Das Wetter-Plugin wählt unabhängig die Prognoseperiode 05–13, 13–18 oder 18–05. Die Anzeige wird beim nächsten TRMNL-Refresh aktualisiert; bei gleichzeitigen oder langen Terminen ist das Ergebnis auf dem echten X zu prüfen.
+
+### Layout-Abnahme
+
+- **Datum** groß und lesbar, auch bei langen deutschen Monatsnamen.
+- **Kopf rechts** mit Sonnenaufgang und Sonnenuntergang, falls bekannt; bei fehlenden Daten deutliche Platzhalter statt Beispielzeiten.
+- **Geburtstage** als eine hellgraue Leiste, kein verspielter Kuchen.
+- **Termine** als ruhige tabellarische Zeilen, sechs sichtbare maximal, Kürzel in hellgrauen Feldern.
+- **Wetter/Kitawege/Müll** auf der rechten Seite ohne überlappende Texte; mögliche oder erwartete Niederschläge in hellgrauer Zeile.
+- **Graustufen** (16 Stufen), Schriftkanten, Zeilenhöhen und Trennlinien auf TRMNL X im Querformat prüfen.
+
+Der Strukturtest `node projects/trmnl-x-familie/dashboard/tests/layout.test.mjs` kontrolliert die wesentlichen CSS- und Datenbindungen. Er ersetzt **keinen echten Rendering- oder Gerätetest**.
 
 ## Einrichtung und Datenzuordnung
 
@@ -144,7 +155,7 @@ Das ist **eine gemeinsame dynamische Ansicht**, keine Sammlung von fünf separat
 | Termine am falschen Tag | Zeitformat, Zeitzone, `utc_offset`, Ganztagskennzeichen und Sommerzeit prüfen |
 | Wetter-/Müllbereich leer | Einzelplugin laden, `Force Refresh`, dann Merge-Zuordnung kontrollieren |
 | „Müllkalender verbinden / Plugin aktualisieren“ | versehentlich **Original** statt X-Projektkopie ausgewählt oder `next_two` fehlt |
-| Wetterzeitraum passt nicht zum Gruß | Gruß- und Wetterlogik haben absichtlich unterschiedliche Zeitfenster |
+| Sonnenzeiten fehlen im Kopf | Wetterplugin mit `daily=sunrise,sunset` aktualisieren, `weather_source.sun` und Quelle prüfen |
 | Text abgeschnitten | Full-Vorschau im X-Format, maximale Terminzahlen, CSS in `shared.liquid` prüfen |
 | Daten trotz erfolgreichem Quellplugin veraltet | Polling-Intervall, Plugin Health und TRMNL-Geräteabruf prüfen |
 
