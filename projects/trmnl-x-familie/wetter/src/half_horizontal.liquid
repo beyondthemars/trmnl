@@ -1,0 +1,14 @@
+<div class="layout fw fw--compact">
+  {% if error != blank %}
+    <div class="fw__empty">{{ error }}</div>
+  {% elsif period %}
+    <div class="fw__hline"><span class="fw__kicker">{{ period.title }}</span><span class="fw__interval">{{ period.hours }}</span></div>
+    <div class="fw__hero">{{ period.temperature_range }}</div>
+    <div class="fw__headline">{{ period.description }}</div>
+    {% for path in paths limit: 2 %}
+      <div class="fw__path fw__path--{{ path.status }}">
+        <span class="fw__path-label">{{ path.hours }}</span><span><strong>{{ path.text }}</strong></span>
+      </div>
+    {% endfor %}
+  {% else %}<div class="fw__empty">Keine Wetterdaten</div>{% endif %}
+</div>

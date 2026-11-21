@@ -1,0 +1,30 @@
+<div class="layout fw fw--full">
+  {% if error != blank %}
+    <div class="fw__empty">{{ error }}</div>
+  {% elsif period %}
+    <div class="fw__hline">
+      <span class="fw__kicker">Wetter · {{ period.title }}</span>
+      <span class="fw__interval">{{ period.hours }}</span>
+    </div>
+    <div class="fw__hero">{{ period.temperature_range }}</div>
+    <div class="fw__headline">{{ period.description }}</div>
+    <div class="fw__note">
+      {% if current.temperature != nil %}Aktuell {{ current.temperature }} °C (Modell) · {% endif %}
+      {% if period.precipitation_probability != nil %}Regenrisiko bis {{ period.precipitation_probability }} % · {% endif %}
+      {% if period.max_wind_kmh != nil %}Wind bis {{ period.max_wind_kmh }} km/h{% endif %}
+    </div>
+    {% if paths.size > 0 %}
+      <div class="fw__paths">
+        <div class="fw__kicker">Unsere Wege</div>
+        {% for path in paths %}
+          <div class="fw__path fw__path--{{ path.status }}">
+            <span class="fw__path-label">{{ path.hours }}</span>
+            <span><strong>{{ path.text }}</strong> · {{ path.name }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="fw__empty">Wetterdaten nicht verfügbar</div>
+  {% endif %}
+</div>

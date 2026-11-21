@@ -1,0 +1,39 @@
+<style>
+/* TRMNL X, native 1872 x 1404, logical 1040 x 780. Flat 4-bit grayscale. */
+.fx{box-sizing:border-box;background:#fff;color:#141414;font-family:Arial,Helvetica,sans-serif;width:100%;height:100%;padding:28px 35px 22px;display:flex;flex-direction:column;overflow:hidden}
+.fx *{box-sizing:border-box}
+.fx__top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:2px solid #181818;padding-bottom:16px}
+.fx__weekday{font-size:20px;letter-spacing:.09em;font-weight:800;text-transform:uppercase}
+.fx__date{font-size:70px;letter-spacing:-.047em;line-height:1.08;font-weight:750;white-space:nowrap}
+.fx__year{font-size:18px;color:#595959;font-weight:550;margin-top:4px}
+.fx__heading-note{font-size:20px;line-height:1.3;text-align:right;font-weight:650;padding-top:5px;white-space:nowrap}
+.fx__birthday{display:flex;align-items:center;gap:18px;min-height:70px;background:#ededed;border:1px solid #bcbcbc;margin-top:17px;padding:10px 17px}
+.fx__birthday-icon{font-size:27px;font-weight:700}
+.fx__birthday-title{font-size:16px;font-weight:800;letter-spacing:.07em;margin-bottom:4px}
+.fx__birthday-body{font-size:22px;font-weight:700}
+.fx__birthday-future{font-size:17px;font-weight:500;color:#555}
+.fx__main{display:grid;grid-template-columns:minmax(0,60%) minmax(0,40%);border-top:2px solid #171717;flex:1;min-height:0;margin-top:18px}
+.fx__agenda{min-width:0;overflow:hidden;padding:17px 23px 0 0;display:flex;flex-direction:column}
+.fx__section{font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.045em}
+.fx__events{margin-top:14px;overflow:hidden;flex:1}
+.fx__event{display:grid;grid-template-columns:88px minmax(0,1fr) 58px;align-items:center;gap:12px;min-height:60px;border-bottom:1px solid #c4c4c4}
+.fx__event-time{font-size:21px;font-weight:750;white-space:nowrap}
+.fx__event-title{font-size:22px;font-weight:620;line-height:1.16;max-height:50px;overflow:hidden;overflow-wrap:anywhere}
+.fx__event-owner{font-size:17px;font-weight:700;border:1px solid #aaa;text-align:center;padding:5px 3px}
+.fx__noevents{font-size:24px;padding:35px 4px;color:#666}
+.fx__side{min-width:0;border-left:1px solid #aaa;display:flex;flex-direction:column}
+.fx__weather{padding:17px 0 17px 22px;flex:1.2;min-height:0;border-bottom:1px solid #aaa;overflow:hidden}
+.fx__period{font-size:16px;color:#555;margin-top:3px}
+.fx__range{font-size:48px;font-weight:750;letter-spacing:-.05em;line-height:1.2;margin-top:11px}
+.fx__description{font-size:22px;font-weight:650;line-height:1.17}
+.fx__meta{font-size:17px;color:#555;line-height:1.35;margin-top:6px}
+.fx__route{font-size:18px;line-height:1.33;margin-top:7px;display:flex;gap:10px}
+.fx__route-time{font-weight:800;white-space:nowrap;min-width:92px}
+.fx__route--expected .fx__route-text{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;font-weight:800}
+.fx__trash{padding:17px 0 0 22px;flex:.75;overflow:hidden}
+.fx__bin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:baseline;border-bottom:1px solid #ddd;padding:9px 0;font-size:19px}
+.fx__bin-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fx__bin-date{white-space:nowrap;font-weight:600}
+.fx__foot{margin-top:8px;padding-top:7px;border-top:1px solid #ccc;font-size:13px;color:#777;display:flex;justify-content:space-between;gap:10px}
+.fx__warning{font-size:17px;color:#555;padding:9px 0;line-height:1.3}
+</style>

@@ -1,0 +1,177 @@
+{% assign local_epoch = "now" | date: "%s" | plus: trmnl.user.utc_offset %}
+{% assign today = local_epoch | date: "%Y-%m-%d" %}
+{% assign tomorrow_epoch = local_epoch | plus: 86400 %}
+{% assign tomorrow = tomorrow_epoch | date: "%Y-%m-%d" %}
+{% assign hour = local_epoch | date: "%H" | plus: 0 %}
+{% assign minute = local_epoch | date: "%M" | plus: 0 %}
+{% assign day_name = local_epoch | date: "%A" %}
+{% assign month_number = local_epoch | date: "%m" %}
+{% assign day_number = local_epoch | date: "%d" | plus: 0 %}
+{% assign year = local_epoch | date: "%Y" %}
+{% assign weekday = day_name %}
+{% case day_name %}
+  {% when "Monday" %}{% assign weekday = "Montag" %}
+  {% when "Tuesday" %}{% assign weekday = "Dienstag" %}
+  {% when "Wednesday" %}{% assign weekday = "Mittwoch" %}
+  {% when "Thursday" %}{% assign weekday = "Donnerstag" %}
+  {% when "Friday" %}{% assign weekday = "Freitag" %}
+  {% when "Saturday" %}{% assign weekday = "Samstag" %}
+  {% when "Sunday" %}{% assign weekday = "Sonntag" %}
+{% endcase %}
+{% assign month = "" %}
+{% case month_number %}
+  {% when "01" %}{% assign month = "Januar" %}
+  {% when "02" %}{% assign month = "Februar" %}
+  {% when "03" %}{% assign month = "März" %}
+  {% when "04" %}{% assign month = "April" %}
+  {% when "05" %}{% assign month = "Mai" %}
+  {% when "06" %}{% assign month = "Juni" %}
+  {% when "07" %}{% assign month = "Juli" %}
+  {% when "08" %}{% assign month = "August" %}
+  {% when "09" %}{% assign month = "September" %}
+  {% when "10" %}{% assign month = "Oktober" %}
+  {% when "11" %}{% assign month = "November" %}
+  {% when "12" %}{% assign month = "Dezember" %}
+{% endcase %}
+{% assign weekend = false %}
+{% if day_name == "Saturday" or day_name == "Sunday" %}{% assign weekend = true %}{% endif %}
+{% assign late = false %}
+{% if hour > 19 or hour == 19 and minute >= 30 or hour < 5 %}{% assign late = true %}{% endif %}
+{% assign greeting = "Unser Tag" %}
+{% if weekend %}
+  {% assign greeting = "Unser Wochenende" %}
+{% elsif hour >= 5 and hour < 8 %}
+  {% assign greeting = "Guten Morgen" %}
+{% elsif hour >= 13 and hour < 14 %}
+  {% assign greeting = "Kita-Abholung" %}
+{% elsif hour >= 14 and hour < 17 %}
+  {% assign greeting = "Familienzeit" %}
+{% elsif hour >= 17 and late == false %}
+  {% assign greeting = "Feierabend" %}
+{% elsif late %}
+  {% assign greeting = "Blick auf morgen" %}
+{% endif %}
+{% assign upcoming = birthday_source.upcoming_birthdays | default: birthday_source.upcoming | default: birthday_source.birthdays | default: birthday_source.data.upcoming_birthdays | default: birthday_source.data.birthdays %}
+{% assign events = calendar_source.events | default: calendar_source.data.events | default: calendar_source.calendar_events | default: calendar_source.data.calendar_events %}
+{% assign upcoming_events = "" | split: "" %}
+{% if events %}
+  {% assign ordered = events %}
+  {% if events.first.start_full %}{% assign ordered = events | sort: "start_full" %}
+  {% elsif events.first.date_time %}{% assign ordered = events | sort: "date_time" %}
+  {% elsif events.first.start_at %}{% assign ordered = events | sort: "start_at" %}
+  {% elsif events.first.start %}{% assign ordered = events | sort: "start" %}{% endif %}
+  {% for event in ordered %}
+    {% assign event_start = event.start_full | default: event.date_time | default: event.start_at | default: event.start | default: event.date %}
+    {% assign event_local_epoch = event_start | date: "%s" | plus: trmnl.user.utc_offset %}
+    {% assign event_day = event_local_epoch | date: "%Y-%m-%d" %}
+    {% assign show_event = false %}
+    {% if late %}
+      {% if event_day == tomorrow and hour >= 19 %}{% assign show_event = true %}{% endif %}
+      {% if event_day == today and hour < 5 %}{% assign show_event = true %}{% endif %}
+    {% elsif hour >= 17 %}
+      {% if event_day == today or event_day == tomorrow %}{% assign show_event = true %}{% endif %}
+    {% elsif event_day == today %}
+      {% if hour < 13 or event_local_epoch >= local_epoch or event.all_day %}{% assign show_event = true %}{% endif %}
+    {% endif %}
+    {% if show_event %}{% assign upcoming_events = upcoming_events | push: event %}{% endif %}
+  {% endfor %}
+{% endif %}
+<div class="layout fx">
+  <header class="fx__top">
+    <div>
+      <div class="fx__weekday">{{ weekday }}</div>
+      <div class="fx__date">{{ day_number }}. {{ month }}</div>
+      <div class="fx__year">{{ year }}</div>
+    </div>
+    <div class="fx__heading-note">{{ greeting }}</div>
+  </header>
+  <div class="fx__birthday">
+    <span class="fx__birthday-icon" aria-hidden="true">✳</span>
+    <div>
+      <div class="fx__birthday-title">GEBURTSTAGE</div>
+      {% if upcoming and upcoming.first %}
+        {% for birthday in upcoming limit: 2 %}
+          {% assign birthday_name = birthday.name | default: birthday.title | default: birthday.person %}
+          {% assign birthday_date = birthday.next_date | default: birthday.date | default: birthday.birthdate %}
+          <span class="fx__birthday-body">{{ birthday_name | escape }}</span>
+          <span class="fx__birthday-future">{% if birthday_date %} · {{ birthday_date | date: "%d.%m." }}{% endif %}</span>
+          {% unless forloop.last %}<span class="fx__birthday-future"> &nbsp; / &nbsp; </span>{% endunless %}
+        {% endfor %}
+      {% else %}
+        <span class="fx__birthday-future">Geburtstagsquelle verbinden oder Datenzuordnung prüfen</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="fx__main">
+    <section class="fx__agenda">
+      <div class="fx__section">{% if late and hour < 5 %}Termine für heute{% elsif late %}Termine für morgen{% elsif hour >= 17 %}Heute &amp; morgen{% else %}Familienkalender heute{% endif %}</div>
+      <div class="fx__events">
+        {% if upcoming_events.size > 0 %}
+          {% for event in upcoming_events limit: 6 %}
+            {% assign event_start = event.start_full | default: event.date_time | default: event.start_at | default: event.start | default: event.date %}
+            {% assign event_local_epoch = event_start | date: "%s" | plus: trmnl.user.utc_offset %}
+            {% assign event_owner = event.calendar_name | default: event.calendar_title | default: event.calendar_display_name | default: event.calendar %}
+            {% assign owner = "–" %}
+            {% case event_owner %}
+              {% when "Henrike" %}{% assign owner = "H" %}
+              {% when "Boy" %}{% assign owner = "B" %}
+              {% when "Jarne" %}{% assign owner = "J" %}
+              {% when "Marit" %}{% assign owner = "M" %}
+              {% when "Marit & Jarne" %}{% assign owner = "M+J" %}
+              {% when "Familie" %}{% assign owner = "F" %}
+            {% endcase %}
+            <div class="fx__event">
+              <span class="fx__event-time">
+                {% if event.all_day == true or event.all_day == "true" %}Ganzt.{% else %}{{ event_local_epoch | date: "%H:%M" }}{% endif %}
+              </span>
+              <span class="fx__event-title">{{ event.summary | default: event.title | default: event.name | escape }}</span>
+              <span class="fx__event-owner">{{ owner }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="fx__noevents">{% if events %}Keine weiteren Termine{% else %}Apple Calendar verbinden und Datenfelder prüfen{% endif %}</div>
+        {% endif %}
+      </div>
+      {% if upcoming_events.size > 6 %}<div class="fx__meta">+ {{ upcoming_events.size | minus: 6 }} weitere Termine</div>{% endif %}
+    </section>
+    <aside class="fx__side">
+      <section class="fx__weather">
+        <div class="fx__section">Wetter{% if weather_source.period %} · {{ weather_source.period.title }}{% endif %}</div>
+        {% if weather_source.period %}
+          <div class="fx__period">{{ weather_source.period.hours }}</div>
+          <div class="fx__range">{{ weather_source.period.temperature_range }}</div>
+          <div class="fx__description">{{ weather_source.period.description }}</div>
+          <div class="fx__meta">
+            {% if weather_source.current.temperature != nil %}Aktuell {{ weather_source.current.temperature }} °C (Modell){% endif %}
+            {% if weather_source.period.precipitation_probability != nil %} · Regenrisiko {{ weather_source.period.precipitation_probability }} %{% endif %}
+          </div>
+          {% for path in weather_source.paths limit: 2 %}
+            <div class="fx__route fx__route--{{ path.status }}">
+              <span class="fx__route-time">{{ path.hours }}</span>
+              <span class="fx__route-text">{{ path.text }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="fx__warning">Familienwetter verbinden</div>
+        {% endif %}
+      </section>
+      <section class="fx__trash">
+        <div class="fx__section">Nächste Müllabfuhr</div>
+        {% if trash_source.next_two and trash_source.next_two.size > 0 %}
+          {% for bin in trash_source.next_two limit: 2 %}
+            <div class="fx__bin">
+              <span class="fx__bin-name">{{ bin.label }}</span>
+              <span class="fx__bin-date">{{ bin.weekday }} {{ bin.date }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="fx__warning">Müllkalender verbinden / Plugin aktualisieren</div>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+  <footer class="fx__foot">
+    <span>HENRIKE · BOY · JARNE · MARIT · M+J · FAMILIE</span>
+    <span>KIEL-SUCHSDORF</span>
+  </footer>
+</div>

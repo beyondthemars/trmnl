@@ -1,0 +1,28 @@
+---
+name: Familien-Dashboard X
+strategy: plugin_merge
+refresh_interval: 15
+framework_version: 3.4.6
+no_screen_padding: 'yes'
+dark_mode: 'no'
+custom_fields:
+- keyname: calendar_source
+  name: Apple-Kalender
+  field_type: plugin_instance_select
+  plugin_keyname: apple_calendar
+  description: Apple Calendar mit allen sechs Familienkalendern wählen
+- keyname: birthday_source
+  name: Geburtstagskalender
+  field_type: plugin_instance_select
+  plugin_keyname: private_plugin
+  description: Recipe Birthday Calendar (Jasper) auswählen
+- keyname: weather_source
+  name: Familienwetter
+  field_type: plugin_instance_select
+  plugin_keyname: private_plugin
+  description: Privates Plugin Familienwetter Kiel auswählen
+- keyname: trash_source
+  name: Müllkalender
+  field_type: plugin_instance_select
+  plugin_keyname: private_plugin
+  description: Privates Plugin Müllkalender Kiel auswählen
