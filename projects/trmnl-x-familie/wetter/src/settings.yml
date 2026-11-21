@@ -2,7 +2,7 @@
 name: Familienwetter Kiel
 strategy: polling
 polling_verb: GET
-polling_url: https://api.open-meteo.com/v1/dwd-icon?latitude={{ latitude }}&longitude={{ longitude }}&timezone=Europe%2FBerlin&past_days=1&forecast_days=3&current=temperature_2m,weather_code&hourly=temperature_2m,precipitation_probability,precipitation,rain,snowfall,weather_code,wind_speed_10m,wind_gusts_10m
+polling_url: https://api.open-meteo.com/v1/dwd-icon?latitude={{ latitude }}&longitude={{ longitude }}&timezone=Europe%2FBerlin&past_days=1&forecast_days=3&current=temperature_2m,weather_code&daily=sunrise,sunset&hourly=temperature_2m,precipitation_probability,precipitation,rain,snowfall,weather_code,wind_speed_10m,wind_gusts_10m
 serverless_language: node
 refresh_interval: 15
 framework_version: 3.4.6
