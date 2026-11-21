@@ -109,8 +109,31 @@ function buildDisplay(events, today, generatedAt) {
     };
   });
   bins.sort((a, b) => a.days - b.days);
+  // Dashboard view: select the two next actual pickups overall, not one per category.
+  // Consecutive pickups may be the same category; pickups on the same date
+  // remain separate entries (one for each waste category).
+  const seen = new Set();
+  const nextTwo = events.flatMap((event) =>
+    CATEGORIES.filter((category) => category.matches.test(event.summary)).map((category) => {
+      const days = dayIndex(event.year, event.month, event.day) - todayIndex;
+      const weekday = WEEKDAYS[new Date(Date.UTC(event.year, event.month - 1, event.day)).getUTCDay()];
+      return {
+        id: category.id, label: category.label, weekday,
+        date: `${String(event.day).padStart(2, "0")}.${String(event.month).padStart(2, "0")}.`,
+        days,
+        iso_date: `${event.year}-${String(event.month).padStart(2, "0")}-${String(event.day).padStart(2, "0")}`,
+        relative: days === 0 ? "Heute" : days === 1 ? "Morgen" : `in ${days} Tagen`
+      };
+    })
+  ).filter((item) => {
+    if (item.days < 0) return false;
+    const key = `${item.id}:${item.iso_date}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => a.days - b.days || CATEGORIES.findIndex((c) => c.id === a.id) - CATEGORIES.findIndex((c) => c.id === b.id)).slice(0, 2);
   const nextDays = bins[0]?.days < 9999 ? bins[0].days : -1;
-  return { bins, next_days: nextDays, generated_at: generatedAt, source: "ABK Kiel / Remondis", error: "" };
+  return { bins, next_two: nextTwo, next_days: nextDays, generated_at: generatedAt, source: "ABK Kiel / Remondis", error: "" };
 }
 
 async function run(input) {
