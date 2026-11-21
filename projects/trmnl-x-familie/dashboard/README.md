@@ -93,7 +93,7 @@ Geburtstage werden bewusst **nicht** aus Apple-Kontakten abgeleitet. Als eigenst
 Das eigenständige [Familienwetter-Plugin](../wetter/README.md) ruft Open-Meteo/DWD ab. Das Dashboard erwartet unter `weather_source` insbesondere:
 
 - `period.title`, `period.hours`, `period.temperature_range`, `period.description`, `period.precipitation_probability`
-- `current.temperature` – **Modellwert**, keine Ecowitt-Messung
+- `current.temperature` – **Modellwert**, keine Ecowitt-Messung; als Quelle verfügbar, aber in der gewählten Referenzansicht nicht zusätzlich zur Temperaturspanne dargestellt
 - `paths[]` mit `hours`, `status` und `text` für die Kitawege
 
 Die Wetterperioden **05–13**, **13–18** und **18–05 Uhr** sowie die Sonnenzeiten kommen vom selben Familienwetter-Plugin. Der Kopf zeigt `weather_source.sun.sunrise` und `weather_source.sun.sunset` als Ortszeiten (HH:MM). Fehlen Daten, erscheinen `–:–` statt erfundener Zeiten. Die Sonnenzeiten werden aus `daily.sunrise`/`daily.sunset` für das **aktuelle lokale Datum** berechnet.
