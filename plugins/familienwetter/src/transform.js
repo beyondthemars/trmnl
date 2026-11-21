@@ -138,6 +138,7 @@ function run(input) {
     error: "",
     source: "Open-Meteo / DWD ICON Seamless",
     updated_date: today,
+    generated_at: new Date().toISOString(), // refresh source to update time-dependent merged layout
     period, current, paths
   };
 }
