@@ -256,8 +256,10 @@ def build(raw, now, place='Rindby Strand'):
     missing.extend(row['label'] for row in today+days if row['incomplete'])
     missing.extend(row['label'] + ' Regen-%' for row in today+days if not row['chance_available'])
     missing.extend(label for label, value in [('Sonnenaufgang', sunrise), ('Sonnenuntergang', sunset)] if value == '–')
-    return dict(place=place, updated=here.strftime('%d.%m. · %H:%M'), today=today, days=days,
-                sunrise=sunrise, sunset=sunset,
+    return dict(place=place, updated=here.strftime('%d.%m. · %H:%M'),
+                updated_date=here.strftime('%d.%m.%Y'),
+                updated_time=here.strftime('%H:%M'),
+                today=today, days=days, sunrise=sunrise, sunset=sunset,
                 temp=fmt(temp), feels=fmt(feels), wind=fmt(bft(wind),0), gust=fmt(bft(gust),0),
                 wind_dir=compass(direction), wind_deg=round(direction) if number(direction) is not None else None,
                 rain=fmt(sum(rain4)) if rain4 else '–', rain_label=rain_label,

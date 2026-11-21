@@ -4,12 +4,14 @@
   font: 16px Arial, sans-serif; font-variant-numeric: tabular-nums; display: grid;
   grid-template-rows: 49px 119px 175px 65px 21px; }
 .fano header, .fano footer { display: flex; align-items: center; justify-content: space-between; }
-.fano header { border-bottom: 3px solid; gap: 12px; }
+.fano header { border-bottom: 3px solid; display: grid; grid-template-columns: 250px minmax(0, 1fr) 196px; column-gap: 12px; align-items: center; }
 .fano h1 { font-size: 32px; line-height: 1; margin: 0; font-weight: 800; }
 .fano h1 span { font-size: 19px; margin-left: 12px; font-weight: 500; }
-.fano header h1, .fano header .caps { white-space: nowrap; }
-.fano header .caps { font-size: 12px; letter-spacing: .5px; }
-.fano .sun-times { display: flex; align-items: center; gap: 15px; margin-left: auto; white-space: nowrap; }
+.fano header h1 { white-space: nowrap; }
+.fano .sun-times { display: flex; align-items: center; justify-content: center; gap: 16px; white-space: nowrap; }
+.fano .updated-block { border-left: 1px solid #000; padding-left: 12px; text-align: right; min-width: 0; }
+.fano .updated-date { display: block; font-size: 21px; font-weight: 800; letter-spacing: .1px; line-height: 1.1; white-space: nowrap; }
+.fano .updated-time { display: block; margin-top: 3px; font-size: 11px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
 .fano .sun-time { display: inline-flex; gap: 5px; align-items: center; font-size: 16px; }
 .fano .sun-time svg { display: block; width: 28px; height: 28px; flex: 0 0 28px; }
 .fano .sun-time strong { font-weight: 800; }
@@ -54,7 +56,10 @@
         </svg><strong>{{ sunset }}</strong>
       </span>
     </div>
-    <div class="caps">{{ updated | escape }} Ortszeit</div>
+    <div class="updated-block">
+      <strong class="updated-date">{{ updated_date | escape }}</strong>
+      <span class="updated-time">Letzte Aktualisierung: {{ updated_time | escape }} Uhr</span>
+    </div>
   </header>
   <section class="now" aria-label="Aktuelles Wetter">
     <div><div class="caps">Temperatur</div><strong class="reading">{{ temp }}<small> °C</small></strong><small>Gefühlt {{ feels }} °C</small></div>
