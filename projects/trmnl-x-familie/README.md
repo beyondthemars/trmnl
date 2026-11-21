@@ -46,24 +46,37 @@ projects/trmnl-x-familie/
 
 ## Darstellungs- und Zeitlogik
 
-### Was ist wo zu sehen?
+### Freigegebene Designreferenz
 
-Das aktuelle Layout [`dashboard/src/full.liquid`](dashboard/src/full.liquid) enthält **einen** zusammenhängenden Bildschirm: oben Wochentag, großes Datum und ein Gruß; darunter Geburtstage; links Termine, rechts Wetter und die zwei nächsten Abholungen.
+Die vom Nutzer ausgewählte **TRMNL-X-Vorschau „Montag, 23. November“** ist die verbindliche Stilreferenz für die spätere Anzeige. Das Dashboard verwendet eine typografisch klare **60/40-Aufteilung** in einer festen **1040 × 780 CSS-Pixel**-Fläche (physisch 1872 × 1404, 16 Graustufen):
 
-| Uhrzeit (Europe/Berlin) | Begrüßung bzw. Fokus im aktuellen Template | Wetterperiode |
+1. Links oben: **Wochentag**, sehr großes **Datum**, **Jahr · Kalenderwoche**.
+2. Rechts oben: ausschließlich **Sonnenaufgang und Sonnenuntergang** mit Zeit und einfachen, gut lesbaren Linien-Icons – **keine Begrüßung und keine „Familienübersicht“-Beschriftung**.
+3. Darunter: dezente, hellgraue Geburtstagsleiste, maximal zwei Geburtstage.
+4. Hauptbereich links (~60 %): bis zu sechs Familienkalender-Termine mit Uhrzeit, Titel und Kalenderkürzel.
+5. Rechts (~40 %): Wetterperiode, Temperaturspanne, kurze Wetterbeschreibung, Kitaweg-Prognosen und genau zwei nächste Müllleerungen.
+6. Unten: eine sehr zurückhaltende Fußzeile, keine Beispielwerte oder technischen Statusmeldungen.
+
+Der Code liegt in [`dashboard/src/full.liquid`](dashboard/src/full.liquid) und [`dashboard/src/shared.liquid`](dashboard/src/shared.liquid). Dezente Flächen (`#eee`, `#ddd`) und klare schwarze Linien sind für das TRMNL X mit 16 Graustufen gewählt; **exakte Wirkung, Schriftlängen und Kontrast müssen auf dem physischen X kontrolliert werden**.
+
+### Was hängt von der Tageszeit ab?
+
+**Nicht** das grundlegende Layout und **nicht** der Kopf: Das Datum und die Sonnenzeiten erscheinen unabhängig von der Uhrzeit. Dynamisch wechseln die zugehörige Wetterperiode und die im Kalender ausgewählten Termine.
+
+| Uhrzeit (Europe/Berlin) | Wetterperiode | Kalenderansicht |
 | --- | --- | --- |
-| 05:00–07:59 | Guten Morgen | Vormittag 05–13 |
-| 08:00–12:59 | Unser Tag | Vormittag 05–13 |
-| 13:00–13:59 | Kita-Abholung | Nachmittag 13–18 |
-| 14:00–16:59 | Familienzeit | Nachmittag 13–18 |
-| 17:00–19:29 | Feierabend | Nachmittag bis 18, danach Abend/Nacht |
-| ab 19:30 | Blick auf morgen | Abend/Nacht 18–05 |
-| 00:00–04:59 | Nacht/Termine für heute | Abend/Nacht der vorausgehenden 18-Uhr-Periode |
-| Sa/So | Unser Wochenende (Gruß hat Vorrang) | Wetter nach denselben Uhrzeiten |
+| 00:00–04:59 | Abend/Nacht der vorigen 18-Uhr-Periode | Termine des begonnenen Tages |
+| 05:00–12:59 | Vormittag 05–13 | heute |
+| 13:00–16:59 | Nachmittag 13–18 | heute (noch relevante Termine) |
+| 17:00–17:59 | Nachmittag 13–18 | heute und morgen |
+| 18:00–19:29 | Abend/Nacht 18–05 | heute und morgen |
+| ab 19:30 | Abend/Nacht 18–05 | morgen |
 
-**Wichtig:** Das ist die aktuelle Programmlogik, nicht die Fertigmeldung aller ursprünglich diskutierten Ideen. Es gibt derzeit **keine eigene Abendessen-, Rezept-, PV5- oder Hausstatus-Kachel**. Der Müllbereich ist im Template derzeit **auch nachts** sichtbar. Eine zukünftige Anzeige nur morgens/nachmittags/abends wäre eine **separate Codeänderung**, keine Einstellung in TRMNL.
+Samstag/Sonntag bleiben im **gleichen visuellen Layout**; Wetterfenster und Kalenderfilter gelten weiter. Im Müllbereich sind aktuell auch nachts die beiden nächsten Leerungen sichtbar.
 
-Die Wetterwarnungen folgen eigenständigen Wegfenstern: **07–09 Uhr** (Arbeit/Kita) und **13–15 Uhr** (Kita-Abholung). Regen, Schnee und Schneeregen werden als **Prognose** ausgewertet, nicht als Echtzeit-Niederschlagsmeldung.
+Die Kitawege werden getrennt bewertet: **07–09 Uhr** (Arbeit/Kita) und **13–15 Uhr** (Abholung). Sonnenzeiten werden über die **bereits bestehende Open-Meteo-Wetterquelle** geliefert (`daily.sunrise`, `daily.sunset`) – **kein zusätzlicher Dienst**. Alle wetterbezogenen Angaben sind Prognosen, keine Messung deiner Ecowitt-Station.
+
+Es gibt derzeit **keine zusätzliche Abendessen-, Rezept-, PV5- oder Hausstatus-Kachel**. Die Apple-/Geburtstagsdaten müssen vor Inbetriebnahme im TRMNL-Merge weiterhin live zugeordnet werden.
 
 ### Kalender
 
