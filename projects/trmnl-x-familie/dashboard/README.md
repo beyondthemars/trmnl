@@ -10,7 +10,7 @@ Schlichtes 4:3-Familiendisplay für TRMNL X (1872 × 1404 physische Pixel, 1040 
 |---|---|---|
 | TRMNL Apple Calendar (offiziell) | Sechs Kalender (Henrike, Boy, Jarne, Marit, Marit & Jarne, Familie) | native Integration |
 | [Birthday Calendar](https://trmnl.com/recipes/birthday-calendar-225941) von Jasper | Eigenständig gepflegte Geburtstage | bestehendes Recipe |
-| [Familienwetter](../familienwetter/) | DWD ICON Seamless / Open-Meteo | TRMNL-Polling + Serverless |
+| [Familienwetter](../wetter/) | DWD ICON Seamless / Open-Meteo | TRMNL-Polling + Serverless |
 | [Müllkalender Kiel](../muellkalender/) | Nächste 2 tatsächliche Abholereignisse aus dem ABKI-Kalender | TRMNL-Polling + Serverless |
 | **Familien-Dashboard X** | Kombinierte Ansicht | Plugin Merge |
 
@@ -34,7 +34,7 @@ Schlichtes 4:3-Familiendisplay für TRMNL X (1872 × 1404 physische Pixel, 1040 
 2. **Apple Calendar** verbinden und genau sechs benötigte iCloud-Kalender auswählen. Termine im Originalplugin prüfen.
 3. **Birthday Calendar** von Jasper installieren und Geburtstage dort verwalten. 14-Tage-Vorschau einschalten. Es werden keine Apple-Kontakte benötigt.
 4. Aus \`plugins/familienwetter/src\` ein **flaches ZIP** (Dateien direkt auf ZIP-Ebene) importieren. Die Standardkoordinaten liegen ungefähr in Kiel-Suchsdorf und können in den TRMNL-Plugin-Einstellungen geändert werden. Polling läuft direkt bei TRMNL. **Force Refresh** durchführen und die Variablen \`period\`, \`paths\`, \`current\` prüfen.
-5. Vorhandenen **Müllkalender Kiel** über GitHub-Sync auf diese Version aktualisieren und **Force Refresh** ausführen. In **Your Variables** muss jetzt neben \`bins\` auch \`next_two\` (mit zwei Ereignissen) erscheinen.
+5. Die **Projektkopie Müllkalender Familie X** aus `projects/trmnl-x-familie/muellkalender/src` als **separates privates Plugin** importieren und **Force Refresh** ausführen. Den bestehenden Müllkalender Kiel nicht verändern. In **Your Variables** muss jetzt neben \`bins\` auch \`next_two\` (mit zwei Ereignissen) erscheinen.
 6. Aus \`plugins/familien-dashboard/src\` ebenfalls ein flaches ZIP importieren. Strategie: **Plugin Merge**. Nach dem ersten Speichern die vier Quellen in den Dropdowns auswählen: Apple Calendar, Birthday Calendar, Familienwetter, Müllkalender. Die Quellen ggf. zunächst als Playlist-Element aktivieren, damit sie im Auswahlfeld erscheinen.
 7. **Your Variables** des zusammenführenden Plugins öffnen und die tatsächliche Struktur von \`calendar_source\` und \`birthday_source\` prüfen. Erst danach die Full-Ansicht auf dem X aktivieren.
 8. Als einziges sichtbares Playlist-Element das **Familien-Dashboard X** verwenden. 15-Minuten-Refresh für die Morgen- und Abholzeiten ist ein sinnvoller Startwert. Aktualisierung erfolgt **nicht minutengenau**; Wetter- und Ansichtswechsel erscheinen beim nächsten Geräte-Check-in.
