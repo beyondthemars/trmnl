@@ -25,7 +25,12 @@ function forecast() {
       hourly.wind_gusts_10m.push(21);
     }
   }
-  return { hourly, current: { temperature_2m: 2.8 } };
+  const daily = {
+    time: ["2026-11-20", "2026-11-21", "2026-11-22"],
+    sunrise: ["2026-11-20T07:54", "2026-11-21T07:56", "2026-11-22T07:58"],
+    sunset: ["2026-11-20T16:13", "2026-11-21T16:12", "2026-11-22T16:11"]
+  };
+  return { hourly, daily, current: { temperature_2m: 2.8 } };
 }
 function runAt(instant, data = forecast()) {
   class FakeDate extends Date {
@@ -38,6 +43,9 @@ const morning = runAt("2026-11-21T06:00:00Z"); // 07:00 CET
 assert.equal(morning.error, "");
 assert.equal(morning.period.key, "morning");
 assert.equal(morning.period.hours, "05–13 Uhr");
+assert.equal(morning.sun.date, "2026-11-21");
+assert.equal(morning.sun.sunrise, "07:56");
+assert.equal(morning.sun.sunset, "16:12");
 assert.equal(morning.current.temperature, 2.8);
 assert.equal(morning.current.is_model_value, true);
 assert.equal(morning.paths.length, 2);
@@ -61,5 +69,17 @@ assert.equal(overnight.period.key, "night");
 assert.equal(overnight.period.from, "2026-11-21T18:00");
 assert.equal(overnight.period.to, "2026-11-22T05:00");
 assert.equal(overnight.paths[0].day, "Heute");
+assert.equal(overnight.sun.date, "2026-11-22");
+assert.equal(overnight.sun.sunrise, "07:58");
+assert.equal(overnight.sun.sunset, "16:11");
 assert.match(runAt("2026-11-21T06:00:00Z", {}).error, /Stundenwerte/);
+const noSun = forecast();
+delete noSun.daily;
+const missing = runAt("2026-11-21T06:00:00Z", noSun);
+assert.equal(missing.sun.date, "2026-11-21");
+assert.equal(missing.sun.sunrise, null);
+assert.equal(missing.sun.sunset, null);
+const wrongDate = forecast();
+wrongDate.daily.sunrise[1] = "2026-11-22T07:56";
+assert.equal(runAt("2026-11-21T06:00:00Z", wrongDate).sun.sunrise, null);
 console.log("Familienwetter mocked period and commute tests passed");
