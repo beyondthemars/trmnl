@@ -76,7 +76,7 @@ Das aktuelle Template zeigt maximal **sechs Termine**, nach Möglichkeit chronol
 
 Geburtstage sollen **unabhängig von Apple-Kontakten** im [Birthday-Calendar-Recipe](https://trmnl.com/recipes/birthday-calendar-225941) gepflegt werden. Das Template reserviert eine Zeile für **maximal zwei Einträge**. Das Recipe bietet eine Einstellung „nur zeigen innerhalb von zwei Wochen“; **das Dashboard setzt die 14-Tage-Grenze bisher nicht selbst durch**. Die Hervorhebung eines heutigen Geburtstags und die verlässliche gemeinsame Merge-Übernahme stehen noch auf der Prüfliste.
 
-## Inbetriebnahme – Reihenfolge
+## Inbetriebnahme Reihenfolge
 
 **Voraussetzung:** Dein TRMNL X ist einem Konto mit **Developer Edition** zugeordnet. Die Developer Edition für das X ist vorhanden. Das Gerät muss in TRMNL erreichbar sein. Richte die Datenquellen zunächst **einzeln** ein, bevor du das große Dashboard aktivierst.
 
