@@ -83,13 +83,28 @@ function parseRows(data) {
     code: fields("weather_code", i)
   })).filter((r) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(r.time));
 }
+// Open-Meteo daily.sunrise/sunset are local ISO-8601 values because polling
+// requests timezone=Europe/Berlin. Never manufacture astronomical times.
+function sunForDate(input, today) {
+  const daily = input?.daily ?? {};
+  const dates = Array.isArray(daily.time) ? daily.time : [];
+  const i = dates.indexOf(today);
+  const read = (key) => {
+    const value = i < 0 ? null : daily[key]?.[i];
+    if (typeof value !== "string" || !value.startsWith(today + "T")) return null;
+    const clock = value.slice(11, 16);
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(clock) ? clock : null;
+  };
+  return { date: today, sunrise: read("sunrise"), sunset: read("sunset") };
+}
 function run(input) {
   const now = localParts(new Date());
   const today = isoDate(now);
   const tomorrow = isoDate(now, 1);
   const yesterday = isoDate(now, -1);
   const rows = parseRows(input);
-  if (!rows.length) return { error: "Open-Meteo liefert keine Stundenwerte", period: null, paths: [] };
+  const sun = sunForDate(input, today);
+  if (!rows.length) return { error: "Open-Meteo liefert keine Stundenwerte", period: null, paths: [], sun };
 
   let periodName, start, end, title, shortHours;
   if (now.hour >= 5 && now.hour < 13) {
@@ -139,6 +154,6 @@ function run(input) {
     source: "Open-Meteo / DWD ICON Seamless",
     updated_date: today,
     generated_at: new Date().toISOString(), // refresh source to update time-dependent merged layout
-    period, current, paths
+    period, current, paths, sun
   };
 }
