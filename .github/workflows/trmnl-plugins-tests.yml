@@ -21,3 +21,5 @@ jobs:
         run: node projects/trmnl-x-familie/muellkalender/tests/test.mjs
       - name: Family weather mock tests
         run: node projects/trmnl-x-familie/wetter/tests/test.mjs
+      - name: TRMNL X approved layout contract
+        run: node projects/trmnl-x-familie/dashboard/tests/layout.test.mjs

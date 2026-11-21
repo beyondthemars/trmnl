@@ -52,6 +52,7 @@ https://api.open-meteo.com/v1/dwd-icon
 | `hourly.weather_code` | zusammenfassende Wetterlage |
 | `hourly.wind_speed_10m` | größter Stundenwind im Zeitfenster |
 | `hourly.wind_gusts_10m` | größte Böe im Zeitfenster |
+| `daily.time`, `daily.sunrise`, `daily.sunset` | lokales Datum, Sonnenaufgang und Sonnenuntergang für die Kopfleiste des X |
 
 Die Prognose wird von **Open-Meteo/DWD ICON** geliefert. Die API gehört nicht zum eigenen Repository und kann sich ändern. Wind und Böen werden als km/h verwendet, Temperaturen als °C; `precipitation` / `rain` als mm und `snowfall` als cm gemäß der angefragten Open-Meteo-Variablen.
 
@@ -64,6 +65,7 @@ Die Prognose wird von **Open-Meteo/DWD ICON** geliefert. Die API gehört nicht z
 - den höchsten stündlichen Wert der Niederschlagswahrscheinlichkeit;
 - die Niederschlagssumme über den Zeitraum;
 - maximale Windgeschwindigkeit und Böe.
+- Sonnenauf- und -untergang für das **aktuelle Datum in Europe/Berlin** aus den Open-Meteo-Tageswerten; ohne verfügbare Daten werden `null`-Werte zurückgegeben.
 
 Hinweis: Wenn du um 12:30 Uhr auf das Display schaust, bezieht sich „05–13“ trotzdem auf den **gesamten Abschnitt** einschließlich der bereits vergangenen Stunden. Das ist aktuell so implementiert.
 
@@ -137,6 +139,7 @@ Das Serverless-Skript `run(input)` liefert:
     "max_wind_kmh": 20
   },
   "current": { "temperature": 4.2, "is_model_value": true },
+  "sun": { "date": "2026-11-21", "sunrise": "07:56", "sunset": "16:12" },
   "paths": [
     {
       "name": "Hinweg",
@@ -151,7 +154,7 @@ Das Serverless-Skript `run(input)` liefert:
 }
 ~~~
 
-**Achtung:** Das sind **Beispielwerte zur Erklärung der Felder**, keine echten Mess- oder Prognosedaten. `paths` kann leer sein; bei Fehlern kann `period` null sein. Das kombinierte Dashboard verwendet insbesondere `period`, `current.temperature` und `paths`.
+**Achtung:** Das sind **Beispielwerte zur Erklärung der Felder**, keine echten Mess- oder Prognosedaten. `paths` kann leer sein; bei Fehlern kann `period` null sein. Das kombinierte Dashboard verwendet insbesondere `period`, `current.temperature`, `paths` und `sun`. Die Sonnenzeiten kommen aus derselben Open-Meteo-Abfrage, **ohne neuen Dienst**. Fehlende/ungültige Sonnenzeiten werden `null`, niemals geraten.
 
 ## Tests
 
@@ -161,7 +164,7 @@ Mocktests mit Node.js, nur beim Entwickeln:
 node projects/trmnl-x-familie/wetter/tests/test.mjs
 ~~~
 
-Geprüft werden: Morgen-/Nachmittag-/Nachtfenster, Tageswechsel 18–05 Uhr, Regen am Hinweg, Schnee bei Abholung, unterdrückte vergangene Wege und fehlende Stundenwerte. **Nicht abgedeckt:** echte API-Ausfälle, wechselnde Open-Meteo-Datenstrukturen, vollständige Feldlücken innerhalb vorhandener Stunden oder Bildschirm-Überläufe.
+Geprüft werden: Morgen-/Nachmittag-/Nachtfenster, Tageswechsel 18–05 Uhr, Regen am Hinweg, Schnee bei Abholung, unterdrückte vergangene Wege, fehlende Stundenwerte **sowie Sonnenaufgang und Sonnenuntergang inklusive Tageswechsel und fehlender Tageswerte**. **Nicht abgedeckt:** echte API-Ausfälle, wechselnde Open-Meteo-Datenstrukturen, vollständige Feldlücken innerhalb vorhandener Stunden oder Bildschirm-Überläufe.
 
 Für die Abnahme auf TRMNL zusätzlich **Force Refresh**, die tatsächlichen Variablen und die Anzeige auf dem X prüfen.
 
@@ -174,6 +177,7 @@ Für die Abnahme auf TRMNL zusätzlich **Force Refresh**, die tatsächlichen Var
 | Hinweg-/Abholwarnung fehlt | außerhalb des beabsichtigten Zeitfensters, `paths` leer oder keine Daten |
 | Warnung sagt „trocken“, obwohl es regnet | Prognoseunsicherheit oder fehlende Felder; Einzelwerte vergleichen |
 | Zeitfenster wirkt um eine Stunde verschoben | Zeitzone `Europe/Berlin`, Sommerzeit und Geräte-/Cloud-Aktualisierung prüfen |
+| Sonnenauf- und untergang zeigen `–:–` | unter `Your Variables` `sun` und die Open-Meteo-`daily`-Antwort prüfen; `daily=sunrise,sunset` muss im Polling enthalten sein |
 | Wetterdaten bleiben lange gleich | letzten `generated_at`-Wert, TRMNL-Polling-Gesundheit und Geräte-Refresh prüfen |
 | Plugin Merge zeigt keine Wetterwerte | im Hauptplugin die Wetterinstanz auswählen und tatsächliche Variablennamen prüfen |
 

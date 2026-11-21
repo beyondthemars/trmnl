@@ -33,24 +33,9 @@
   {% when "11" %}{% assign month = "November" %}
   {% when "12" %}{% assign month = "Dezember" %}
 {% endcase %}
-{% assign weekend = false %}
-{% if day_name == "Saturday" or day_name == "Sunday" %}{% assign weekend = true %}{% endif %}
+{% assign week = local_epoch | date: "%V" %}
 {% assign late = false %}
 {% if hour > 19 or hour == 19 and minute >= 30 or hour < 5 %}{% assign late = true %}{% endif %}
-{% assign greeting = "Unser Tag" %}
-{% if weekend %}
-  {% assign greeting = "Unser Wochenende" %}
-{% elsif hour >= 5 and hour < 8 %}
-  {% assign greeting = "Guten Morgen" %}
-{% elsif hour >= 13 and hour < 14 %}
-  {% assign greeting = "Kita-Abholung" %}
-{% elsif hour >= 14 and hour < 17 %}
-  {% assign greeting = "Familienzeit" %}
-{% elsif hour >= 17 and late == false %}
-  {% assign greeting = "Feierabend" %}
-{% elsif late %}
-  {% assign greeting = "Blick auf morgen" %}
-{% endif %}
 {% assign upcoming = birthday_source.upcoming_birthdays | default: birthday_source.upcoming | default: birthday_source.birthdays | default: birthday_source.data.upcoming_birthdays | default: birthday_source.data.birthdays %}
 {% assign events = calendar_source.events | default: calendar_source.data.events | default: calendar_source.calendar_events | default: calendar_source.data.calendar_events %}
 {% assign upcoming_events = "" | split: "" %}
@@ -76,35 +61,91 @@
     {% if show_event %}{% assign upcoming_events = upcoming_events | push: event %}{% endif %}
   {% endfor %}
 {% endif %}
+{% assign sun_data = weather_source.sun | default: weather_source.data.sun %}
+{% assign sunrise = sun_data.sunrise | default: "–:–" %}
+{% assign sunset = sun_data.sunset | default: "–:–" %}
+{% assign first_birthday = upcoming.first %}
+{% assign second_birthday = upcoming[1] %}
+{% assign birthday_name = first_birthday.name | default: first_birthday.title | default: first_birthday.person %}
+{% assign birthday_date = first_birthday.next_date | default: first_birthday.date | default: first_birthday.birthdate %}
+{% assign birthday_days = first_birthday.days_until | default: first_birthday.days | default: first_birthday.days_away %}
+{% assign birthday_month = birthday_date | date: "%m" %}
+{% assign birthday_month_name = "" %}
+{% case birthday_month %}
+  {% when "01" %}{% assign birthday_month_name = "Januar" %}
+  {% when "02" %}{% assign birthday_month_name = "Februar" %}
+  {% when "03" %}{% assign birthday_month_name = "März" %}
+  {% when "04" %}{% assign birthday_month_name = "April" %}
+  {% when "05" %}{% assign birthday_month_name = "Mai" %}
+  {% when "06" %}{% assign birthday_month_name = "Juni" %}
+  {% when "07" %}{% assign birthday_month_name = "Juli" %}
+  {% when "08" %}{% assign birthday_month_name = "August" %}
+  {% when "09" %}{% assign birthday_month_name = "September" %}
+  {% when "10" %}{% assign birthday_month_name = "Oktober" %}
+  {% when "11" %}{% assign birthday_month_name = "November" %}
+  {% when "12" %}{% assign birthday_month_name = "Dezember" %}
+{% endcase %}
 <div class="layout fx">
   <header class="fx__top">
-    <div>
+    <div class="fx__date-block">
       <div class="fx__weekday">{{ weekday }}</div>
       <div class="fx__date">{{ day_number }}. {{ month }}</div>
-      <div class="fx__year">{{ year }}</div>
+      <div class="fx__year">{{ year }} · Kalenderwoche {{ week }}</div>
     </div>
-    <div class="fx__heading-note">{{ greeting }}</div>
+    <div class="fx__sun" aria-label="Sonnenzeiten für Kiel-Suchsdorf">
+      <div class="fx__sun-item">
+        <div class="fx__sun-label">Sonnenaufgang</div>
+        <div class="fx__sun-value">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 24h26 M7 24a9 9 0 0 1 18 0 M16 3v5 M5 10l3.5 3.5 M27 10l-3.5 3.5"/>
+            <path d="M16 15V9 M12.5 12.5 16 9l3.5 3.5"/>
+          </svg>
+          <span>{{ sunrise }}</span>
+        </div>
+      </div>
+      <div class="fx__sun-item">
+        <div class="fx__sun-label">Sonnenuntergang</div>
+        <div class="fx__sun-value">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 24h26 M7 24a9 9 0 0 1 18 0 M16 3v5 M5 10l3.5 3.5 M27 10l-3.5 3.5"/>
+            <path d="M16 9v6 M12.5 11.5 16 15l3.5-3.5"/>
+          </svg>
+          <span>{{ sunset }}</span>
+        </div>
+      </div>
+    </div>
   </header>
-  <div class="fx__birthday">
-    <span class="fx__birthday-icon" aria-hidden="true">✳</span>
-    <div>
-      <div class="fx__birthday-title">GEBURTSTAGE</div>
-      {% if upcoming and upcoming.first %}
-        {% for birthday in upcoming limit: 2 %}
-          {% assign birthday_name = birthday.name | default: birthday.title | default: birthday.person %}
-          {% assign birthday_date = birthday.next_date | default: birthday.date | default: birthday.birthdate %}
-          <span class="fx__birthday-body">{{ birthday_name | escape }}</span>
-          <span class="fx__birthday-future">{% if birthday_date %} · {{ birthday_date | date: "%d.%m." }}{% endif %}</span>
-          {% unless forloop.last %}<span class="fx__birthday-future"> &nbsp; / &nbsp; </span>{% endunless %}
-        {% endfor %}
+  <section class="fx__birthday" aria-label="Geburtstage">
+    <div class="fx__birthday-primary">
+      <div class="fx__birthday-title">Geburtstage</div>
+      {% if first_birthday %}
+        <div class="fx__birthday-body">
+          {{ birthday_name | escape }}{% if birthday_date %} · {{ birthday_date | date: "%d" | plus: 0 }}. {{ birthday_month_name }}{% endif %}
+        </div>
       {% else %}
-        <span class="fx__birthday-future">Geburtstagsquelle verbinden oder Datenzuordnung prüfen</span>
+        <div class="fx__birthday-body">Keine Geburtstage verfügbar</div>
       {% endif %}
     </div>
-  </div>
+    {% if second_birthday %}
+      {% assign second_name = second_birthday.name | default: second_birthday.title | default: second_birthday.person %}
+      {% assign second_date = second_birthday.next_date | default: second_birthday.date | default: second_birthday.birthdate %}
+      <div class="fx__birthday-side">Danach: {{ second_name | escape }}{% if second_date %} · {{ second_date | date: "%d.%m." }}{% endif %}</div>
+    {% elsif first_birthday and birthday_days != nil %}
+      <div class="fx__birthday-side">
+        {% if birthday_days == 0 %}Heute!{% elsif birthday_days == 1 %}Morgen{% else %}in {{ birthday_days }} Tagen{% endif %}
+      </div>
+    {% endif %}
+  </section>
   <div class="fx__main">
     <section class="fx__agenda">
-      <div class="fx__section">{% if late and hour < 5 %}Termine für heute{% elsif late %}Termine für morgen{% elsif hour >= 17 %}Heute &amp; morgen{% else %}Familienkalender heute{% endif %}</div>
+      <div class="fx__heading">
+        <span class="fx__section">
+          {% if late and hour >= 19 %}Morgen im Familienkalender
+          {% elsif hour >= 17 %}Heute &amp; morgen im Kalender
+          {% else %}Heute im Familienkalender{% endif %}
+        </span>
+        <span class="fx__hint">6 Kalender</span>
+      </div>
       <div class="fx__events">
         {% if upcoming_events.size > 0 %}
           {% for event in upcoming_events limit: 6 %}
@@ -129,49 +170,60 @@
             </div>
           {% endfor %}
         {% else %}
-          <div class="fx__noevents">{% if events %}Keine weiteren Termine{% else %}Apple Calendar verbinden und Datenfelder prüfen{% endif %}</div>
+          <div class="fx__noevents">{% if events %}Keine weiteren Termine{% else %}Apple Calendar noch nicht verbunden{% endif %}</div>
         {% endif %}
       </div>
-      {% if upcoming_events.size > 6 %}<div class="fx__meta">+ {{ upcoming_events.size | minus: 6 }} weitere Termine</div>{% endif %}
+      {% if upcoming_events.size > 6 %}
+        <div class="fx__overflow">+ {{ upcoming_events.size | minus: 6 }} weitere Termine</div>
+      {% endif %}
     </section>
     <aside class="fx__side">
       <section class="fx__weather">
-        <div class="fx__section">Wetter{% if weather_source.period %} · {{ weather_source.period.title }}{% endif %}</div>
+        <div class="fx__period-header">
+          <span class="fx__section">Wetter{% if weather_source.period %} · {{ weather_source.period.title }}{% endif %}</span>
+          <span class="fx__hint">{% if weather_source.period %}{{ weather_source.period.hours }}{% endif %}</span>
+        </div>
         {% if weather_source.period %}
-          <div class="fx__period">{{ weather_source.period.hours }}</div>
           <div class="fx__range">{{ weather_source.period.temperature_range }}</div>
           <div class="fx__description">{{ weather_source.period.description }}</div>
           <div class="fx__meta">
-            {% if weather_source.current.temperature != nil %}Aktuell {{ weather_source.current.temperature }} °C (Modell){% endif %}
-            {% if weather_source.period.precipitation_probability != nil %} · Regenrisiko {{ weather_source.period.precipitation_probability }} %{% endif %}
+            {% if weather_source.period.precipitation_probability != nil %}Regenrisiko bis {{ weather_source.period.precipitation_probability }} %{% endif %}
+            {% if weather_source.period.max_wind_kmh != nil %} · Wind {{ weather_source.period.max_wind_kmh }} km/h{% endif %}
           </div>
-          {% for path in weather_source.paths limit: 2 %}
-            <div class="fx__route fx__route--{{ path.status }}">
-              <span class="fx__route-time">{{ path.hours }}</span>
-              <span class="fx__route-text">{{ path.text }}</span>
+          {% if weather_source.paths and weather_source.paths.size > 0 %}
+            <div class="fx__ways">
+              <div class="fx__ways-title">Unsere Wege</div>
+              {% for path in weather_source.paths limit: 2 %}
+                <div class="fx__route fx__route--{{ path.status }}">
+                  <span class="fx__route-time">{{ path.hours | remove: " Uhr" }}</span>
+                  <span class="fx__route-text">{{ path.text }}</span>
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
+          {% endif %}
         {% else %}
-          <div class="fx__warning">Familienwetter verbinden</div>
+          <div class="fx__warning">Wetterdaten noch nicht verbunden</div>
         {% endif %}
       </section>
       <section class="fx__trash">
         <div class="fx__section">Nächste Müllabfuhr</div>
         {% if trash_source.next_two and trash_source.next_two.size > 0 %}
-          {% for bin in trash_source.next_two limit: 2 %}
-            <div class="fx__bin">
-              <span class="fx__bin-name">{{ bin.label }}</span>
-              <span class="fx__bin-date">{{ bin.weekday }} {{ bin.date }}</span>
-            </div>
-          {% endfor %}
+          <div class="fx__bins">
+            {% for bin in trash_source.next_two limit: 2 %}
+              <div class="fx__bin">
+                <span class="fx__bin-name">{{ bin.label }}</span>
+                <span class="fx__bin-date">{{ bin.weekday }}, {{ bin.date }}</span>
+              </div>
+            {% endfor %}
+          </div>
         {% else %}
-          <div class="fx__warning">Müllkalender verbinden / Plugin aktualisieren</div>
+          <div class="fx__warning">Müllkalender noch nicht verbunden</div>
         {% endif %}
       </section>
     </aside>
   </div>
   <footer class="fx__foot">
-    <span>HENRIKE · BOY · JARNE · MARIT · M+J · FAMILIE</span>
     <span>KIEL-SUCHSDORF</span>
+    <span>FAMILIEN-DASHBOARD · TRMNL X</span>
   </footer>
 </div>

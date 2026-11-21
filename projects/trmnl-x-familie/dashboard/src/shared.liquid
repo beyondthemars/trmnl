@@ -1,39 +1,125 @@
 <style>
-/* TRMNL X, native 1872 x 1404, logical 1040 x 780. Flat 4-bit grayscale. */
-.fx{box-sizing:border-box;background:#fff;color:#141414;font-family:Arial,Helvetica,sans-serif;width:100%;height:100%;padding:28px 35px 22px;display:flex;flex-direction:column;overflow:hidden}
-.fx *{box-sizing:border-box}
-.fx__top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;border-bottom:2px solid #181818;padding-bottom:16px}
-.fx__weekday{font-size:20px;letter-spacing:.09em;font-weight:800;text-transform:uppercase}
-.fx__date{font-size:70px;letter-spacing:-.047em;line-height:1.08;font-weight:750;white-space:nowrap}
-.fx__year{font-size:18px;color:#595959;font-weight:550;margin-top:4px}
-.fx__heading-note{font-size:20px;line-height:1.3;text-align:right;font-weight:650;padding-top:5px;white-space:nowrap}
-.fx__birthday{display:flex;align-items:center;gap:18px;min-height:70px;background:#ededed;border:1px solid #bcbcbc;margin-top:17px;padding:10px 17px}
-.fx__birthday-icon{font-size:27px;font-weight:700}
-.fx__birthday-title{font-size:16px;font-weight:800;letter-spacing:.07em;margin-bottom:4px}
-.fx__birthday-body{font-size:22px;font-weight:700}
-.fx__birthday-future{font-size:17px;font-weight:500;color:#555}
-.fx__main{display:grid;grid-template-columns:minmax(0,60%) minmax(0,40%);border-top:2px solid #171717;flex:1;min-height:0;margin-top:18px}
-.fx__agenda{min-width:0;overflow:hidden;padding:17px 23px 0 0;display:flex;flex-direction:column}
-.fx__section{font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.045em}
-.fx__events{margin-top:14px;overflow:hidden;flex:1}
-.fx__event{display:grid;grid-template-columns:88px minmax(0,1fr) 58px;align-items:center;gap:12px;min-height:60px;border-bottom:1px solid #c4c4c4}
-.fx__event-time{font-size:21px;font-weight:750;white-space:nowrap}
-.fx__event-title{font-size:22px;font-weight:620;line-height:1.16;max-height:50px;overflow:hidden;overflow-wrap:anywhere}
-.fx__event-owner{font-size:17px;font-weight:700;border:1px solid #aaa;text-align:center;padding:5px 3px}
-.fx__noevents{font-size:24px;padding:35px 4px;color:#666}
-.fx__side{min-width:0;border-left:1px solid #aaa;display:flex;flex-direction:column}
-.fx__weather{padding:17px 0 17px 22px;flex:1.2;min-height:0;border-bottom:1px solid #aaa;overflow:hidden}
-.fx__period{font-size:16px;color:#555;margin-top:3px}
-.fx__range{font-size:48px;font-weight:750;letter-spacing:-.05em;line-height:1.2;margin-top:11px}
-.fx__description{font-size:22px;font-weight:650;line-height:1.17}
-.fx__meta{font-size:17px;color:#555;line-height:1.35;margin-top:6px}
-.fx__route{font-size:18px;line-height:1.33;margin-top:7px;display:flex;gap:10px}
-.fx__route-time{font-weight:800;white-space:nowrap;min-width:92px}
-.fx__route--expected .fx__route-text{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;font-weight:800}
-.fx__trash{padding:17px 0 0 22px;flex:.75;overflow:hidden}
-.fx__bin{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:baseline;border-bottom:1px solid #ddd;padding:9px 0;font-size:19px}
-.fx__bin-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fx__bin-date{white-space:nowrap;font-weight:600}
-.fx__foot{margin-top:8px;padding-top:7px;border-top:1px solid #ccc;font-size:13px;color:#777;display:flex;justify-content:space-between;gap:10px}
-.fx__warning{font-size:17px;color:#555;padding:9px 0;line-height:1.3}
+/* TRMNL X Full Landscape: 1040 x 780 logical px -> 1872 x 1404 physical px.
+   Design reference: family preview of 23 Nov 2026. Flat grayscale, no gradients. */
+.fx,.fx *{box-sizing:border-box}
+.fx{
+  display:flex;flex-direction:column;width:100%;height:100%;min-height:0;
+  padding:34px 42px 11px;background:#fff;color:#111;
+  font-family:Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;
+  overflow:hidden
+}
+.fx__top{
+  height:154px;min-height:154px;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:16px;border-bottom:3px solid #111
+}
+.fx__date-block{min-width:0}
+.fx__weekday{
+  color:#666;font-size:17px;font-weight:800;letter-spacing:.02em;
+  text-transform:uppercase;line-height:23px
+}
+.fx__date{
+  margin-top:10px;font-size:76px;line-height:1;letter-spacing:-.045em;
+  font-weight:800;white-space:nowrap
+}
+.fx__year{
+  margin-top:8px;color:#666;font-size:16px;line-height:19px;
+  font-weight:700;letter-spacing:.025em;text-transform:uppercase
+}
+/* Only the two sun times occupy the upper-right header: no greeting/banner. */
+.fx__sun{
+  margin-top:18px;display:flex;justify-content:flex-end;gap:0;
+  flex:0 0 auto;min-width:0;text-align:right
+}
+.fx__sun-item{min-width:126px;display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.fx__sun-item + .fx__sun-item{margin-left:15px;padding-left:15px;border-left:1px solid #bbb}
+.fx__sun-label{font-size:13px;font-weight:700;letter-spacing:.015em;text-transform:uppercase;color:#666;white-space:nowrap}
+.fx__sun-value{display:flex;align-items:center;justify-content:flex-end;gap:7px;font-size:29px;line-height:1;font-weight:800;white-space:nowrap}
+.fx__sun-value svg{width:27px;height:27px;flex:0 0 27px;stroke:#111}
+.fx__birthday{
+  flex:none;height:70px;min-height:70px;margin-top:15px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  border-radius:5px;background:#eee;padding:11px 18px
+}
+.fx__birthday-primary{min-width:0;flex:1}
+.fx__birthday-title{font-size:15px;font-weight:800;color:#666;letter-spacing:.015em;line-height:20px}
+.fx__birthday-body{
+  display:block;margin-top:1px;font-size:21px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:28px
+}
+.fx__birthday-side{
+  font-size:17px;line-height:22px;color:#666;white-space:nowrap;
+  max-width:42%;overflow:hidden;text-overflow:ellipsis;text-align:right
+}
+.fx__main{
+  display:grid;grid-template-columns:minmax(0,60%) minmax(0,40%);
+  flex:1;min-height:0;margin-top:24px;border-top:2px solid #111
+}
+.fx__agenda{
+  display:flex;flex-direction:column;min-height:0;min-width:0;
+  padding:14px 27px 0 0;overflow:hidden
+}
+.fx__heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
+.fx__section{
+  font-size:16px;line-height:22px;letter-spacing:-.015em;
+  font-weight:800;text-transform:uppercase
+}
+.fx__hint{color:#666;font-size:13px;font-weight:500;white-space:nowrap;text-transform:uppercase}
+.fx__events{flex:1;min-height:0;overflow:hidden;margin-top:15px}
+.fx__event{
+  display:grid;grid-template-columns:90px minmax(0,1fr) 47px;
+  gap:10px;align-items:center;min-height:57px;
+  border-bottom:1px solid #bbb
+}
+.fx__event-time{font-size:20px;font-weight:800;white-space:nowrap}
+.fx__event-title{
+  font-size:21px;font-weight:500;min-width:0;max-width:100%;
+  line-height:1.24;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.fx__event-owner{
+  display:block;justify-self:end;min-width:37px;max-width:47px;
+  border-radius:5px;padding:7px 4px;background:#eee;
+  text-align:center;font-size:16px;line-height:20px;font-weight:700
+}
+.fx__noevents{font-size:19px;color:#666;padding:26px 0}
+.fx__overflow{margin-top:8px;color:#666;font-size:13px}
+.fx__side{
+  min-width:0;display:flex;flex-direction:column;
+  padding:14px 0 0 22px;border-left:1px solid #aaa;overflow:hidden
+}
+.fx__weather{flex:none;min-height:0;overflow:hidden}
+.fx__period-header{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.fx__range{
+  margin-top:19px;font-size:60px;font-weight:800;line-height:1;
+  letter-spacing:-.045em;white-space:nowrap
+}
+.fx__description{font-size:21px;line-height:1.2;font-weight:700;margin-top:9px}
+.fx__meta{color:#666;font-size:14px;line-height:19px;margin-top:5px}
+.fx__ways{border-top:1px solid #bbb;margin-top:4px;padding-top:15px}
+.fx__ways-title{font-size:14px;font-weight:800;text-transform:uppercase;line-height:20px}
+.fx__route{
+  display:grid;grid-template-columns:90px minmax(0,1fr);align-items:center;
+  gap:10px;min-height:34px;padding:5px 8px;margin-top:4px;
+  font-size:16px;line-height:22px
+}
+.fx__route--possible,.fx__route--expected{background:#ddd;border-radius:3px}
+.fx__route-time{font-size:16px;font-weight:800;white-space:nowrap}
+.fx__route-text{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx__route--expected .fx__route-text{font-weight:800}
+.fx__trash{
+  flex:1;min-height:0;min-width:0;overflow:hidden;
+  border-top:1px solid #bbb;margin-top:14px;padding-top:14px
+}
+.fx__bins{margin-top:10px}
+.fx__bin{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  gap:8px;min-height:44px;border-bottom:1px solid #bbb
+}
+.fx__bin-name{font-size:18px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fx__bin-date{font-size:16px;font-weight:500;white-space:nowrap}
+.fx__warning{color:#666;font-size:15px;line-height:1.3;margin-top:13px}
+.fx__foot{
+  flex:none;display:flex;justify-content:space-between;align-items:center;
+  gap:12px;height:21px;margin-top:12px;border-top:1px solid #bbb;
+  color:#777;font-size:12px;font-weight:500;white-space:nowrap
+}
 </style>
