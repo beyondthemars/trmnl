@@ -1,57 +1,163 @@
-# Familien-Dashboard für TRMNL X
+# Familien-Dashboard X – gemeinsames Displaylayout
 
-**Status:** Entwicklungsstand / Integrationsvorlage; noch **nicht** auf einem angemeldeten TRMNL X mit echten Apple-Kalendern und Geburtstagsdaten getestet.
+Dieses private TRMNL-Plugin ist die **Anzeigeschicht** des [Familiendashboard-Projekts](../README.md). Es beschafft **keine Wetter-, Abfall-, Kalender- oder Geburtstagsdaten selbst**, sondern führt die Daten vier anderer TRMNL-Plugin-Instanzen per **Plugin Merge** in einem einheitlichen Layout zusammen.
 
-Schlichtes 4:3-Familiendisplay für TRMNL X (1872 × 1404 physische Pixel, 1040 × 780 Layout-Pixel, 16 Graustufen). Kein zusätzlicher Server, kein Home Assistant, keine lokale Bridge.
+Das Ziel ist eine **ruhige, schnell erkennbare Küchenübersicht** auf dem **TRMNL X im Querformat**: großes Datum, sechs Apple-Kalender, kompakte Geburtstage, Wetter für die laufende Tagesperiode und die nächsten zwei Müllleerungen. Keine Uhrzeitanzeige, kein lokaler Dienst.
+
+> **Wichtiger Status:** Das Layout ist als Entwicklungs-/Integrationsvorlage im Repository vorhanden. Die reale Datenstruktur von **Apple Calendar** und **Birthday Calendar** ist für dieses Konto noch **nicht geprüft**. Deshalb ist die Installation ein **Integrationstest**, nicht schon ein fertiger produktiver Rollout.
 
 ## Aufbau
 
-| Quelle | Daten | Strategie |
-|---|---|---|
-| TRMNL Apple Calendar (offiziell) | Sechs Kalender (Henrike, Boy, Jarne, Marit, Marit & Jarne, Familie) | native Integration |
-| [Birthday Calendar](https://trmnl.com/recipes/birthday-calendar-225941) von Jasper | Eigenständig gepflegte Geburtstage | bestehendes Recipe |
-| [Familienwetter](../wetter/) | DWD ICON Seamless / Open-Meteo | TRMNL-Polling + Serverless |
-| [Müllkalender Kiel](../muellkalender/) | Nächste 2 tatsächliche Abholereignisse aus dem ABKI-Kalender | TRMNL-Polling + Serverless |
-| **Familien-Dashboard X** | Kombinierte Ansicht | Plugin Merge |
+| Bereich | Layout | Datenherkunft |
+| --- | --- | --- |
+| Datum/Wochentag | ganz oben, groß | Zeit-/Zeitzonenwerte im TRMNL-Liquid-Template |
+| Begrüßung | rechts im Kopf | aktuelle Tageszeit und Wochentag |
+| Geburtstage | schmale Zeile unter dem Datum | externes Birthday-Calendar-Recipe |
+| Familienkalender | ca. 60 % der Hauptfläche, maximal sechs Termine | offizielle TRMNL-Apple-Calendar-Integration |
+| Familienwetter | obere rechte Spalte | [Wetterplugin](../wetter/README.md) |
+| Müllabfuhr | untere rechte Spalte | [separates X-Müllplugin](../muellkalender/README.md) |
 
-**Keine Ecowitt-Abfrage**: Private IPs wie 192.168.x.x sind für TRMNL-Cloud-Polling nicht erreichbar; ein dafür nötiger Heimnetz-Übermittler ist ausdrücklich **nicht gewünscht**.
+Das Full-Layout ist in [`src/full.liquid`](src/full.liquid) enthalten; Gestaltung und Graustufen in [`src/shared.liquid`](src/shared.liquid). Die Datei [`src/settings.yml`](src/settings.yml) deklariert Plugin Merge und die vier Quell-Auswahlfelder.
 
-## Darstellung
+Aktuell existiert nur **`full.liquid`** als Ansicht: **keine Half-/Quadrant-Vorlagen** für das gemeinsame Dashboard. Es ist für das TRMNL X (physisch **1872 × 1404 px**, 4 Bit/16 Graustufen) im Querformat vorgesehen; das Framework-Layout verwendet ungefähr **1040 × 780**. Die grafische Darstellung auf dem realen X ist noch zu prüfen.
 
-- Datum groß, **keine Uhrzeit**.
-- Geburtstage als zurückhaltende Zeile, maximal zwei.
-- Links bis zu sechs chronologische Kalendereinträge; Kürzel H/B/J/M/M+J/F.
-- Rechts: Temperaturspanne und Wetter für **05–13**, **13–18** oder **18–05 Uhr**.
-- Separate Niederschlagsabschätzung für **07–09** und **13–15 Uhr** (Regen, Schnee, Schneeregen); nachts Vorschau auf den nächsten Morgen.
-- Die nächsten **zwei realen Müllabholungen**, nicht eine pro Müllart.
-- Flächen statt Effekte: Weiß, helles Grau, schmale Linien, große serifenlose Schrift; keine Schatten, keine Verläufe.
+## Quellen und Plugin-Merge-Einstellungen
 
-## Einrichtung bei TRMNL
+Die Datei `src/settings.yml` enthält vier `plugin_instance_select`-Felder:
 
-**Voraussetzung:** Ein TRMNL-Konto mit *Developer Edition* bzw. entsprechender BYOD-Freischaltung, damit private Plugins und Plugin Merge bearbeitet werden können.
+| Schlüssel im Dashboard | Soll-Quelle | Typ im bestehenden YAML |
+| --- | --- | --- |
+| `calendar_source` | Apple Calendar, sechs ausgewählte Kalender | `plugin_keyname: apple_calendar` |
+| `birthday_source` | Birthday Calendar (Jasper) | `plugin_keyname: private_plugin` |
+| `weather_source` | Familienwetter Kiel | `plugin_keyname: private_plugin` |
+| `trash_source` | Müllkalender Familie X | `plugin_keyname: private_plugin` |
 
-1. Konto-Zeitzone auf **Europe/Berlin** und Sprache auf Deutsch einstellen.
-2. **Apple Calendar** verbinden und genau sechs benötigte iCloud-Kalender auswählen. Termine im Originalplugin prüfen.
-3. **Birthday Calendar** von Jasper installieren und Geburtstage dort verwalten. 14-Tage-Vorschau einschalten. Es werden keine Apple-Kontakte benötigt.
-4. Aus \`plugins/familienwetter/src\` ein **flaches ZIP** (Dateien direkt auf ZIP-Ebene) importieren. Die Standardkoordinaten liegen ungefähr in Kiel-Suchsdorf und können in den TRMNL-Plugin-Einstellungen geändert werden. Polling läuft direkt bei TRMNL. **Force Refresh** durchführen und die Variablen \`period\`, \`paths\`, \`current\` prüfen.
-5. Die **Projektkopie Müllkalender Familie X** aus `projects/trmnl-x-familie/muellkalender/src` als **separates privates Plugin** importieren und **Force Refresh** ausführen. Den bestehenden Müllkalender Kiel nicht verändern. In **Your Variables** muss jetzt neben \`bins\` auch \`next_two\` (mit zwei Ereignissen) erscheinen.
-6. Aus \`plugins/familien-dashboard/src\` ebenfalls ein flaches ZIP importieren. Strategie: **Plugin Merge**. Nach dem ersten Speichern die vier Quellen in den Dropdowns auswählen: Apple Calendar, Birthday Calendar, Familienwetter, Müllkalender. Die Quellen ggf. zunächst als Playlist-Element aktivieren, damit sie im Auswahlfeld erscheinen.
-7. **Your Variables** des zusammenführenden Plugins öffnen und die tatsächliche Struktur von \`calendar_source\` und \`birthday_source\` prüfen. Erst danach die Full-Ansicht auf dem X aktivieren.
-8. Als einziges sichtbares Playlist-Element das **Familien-Dashboard X** verwenden. 15-Minuten-Refresh für die Morgen- und Abholzeiten ist ein sinnvoller Startwert. Aktualisierung erfolgt **nicht minutengenau**; Wetter- und Ansichtswechsel erscheinen beim nächsten Geräte-Check-in.
+Die Felder sind TRMNL-seitig **Auswahlfelder für eine konkrete Plugin-Instanz**, nicht selbst die API und auch keine hart codierten IDs. Die tatsächlichen Quellinstanzen **müssen vorhanden sein und Daten besitzen**.
 
-## Noch offen: Live-Daten-Mapping
+**Wichtig bei der Auswahl:** Nach TRMNL-Dokumentation werden im Instanz-Auswahlfeld nur Plugins angezeigt, die derzeit **in einer Playlist oder einem Mashup** sind. Für die Einrichtung daher die Quellplugins bei Bedarf vorübergehend einer Playlist zuordnen. Nach Auswahl und erfolgreichem Test kann die Playlist wieder bereinigt werden; Plugin Merge kann ausgewählte Quellen weiterhin laden.
 
-Im Merge-Template sind die gängigen Kalenderfelder \`events\`, \`calendar_events\` sowie \`data.events\` berücksichtigt. **Das ist eine Kompatibilitätsannahme, keine bestätigte Apple-Calendar-Datenstruktur für dieses Konto.** Auch Titel (\`summary\`/\`title\`), Startzeit (\`start_full\`/\`date_time\`/\`start_at\`/\`start\`) und Kalendername müssen anhand von *Your Variables* bestätigt werden.
+Die Beispiele `calendar_source.events` und `birthday_source.birthdays` sind **Annahmen**, keine durch deine Instanzen bestätigten Datenfelder. Die Namen können bei nativen Integrationen und Recipes abweichen.
 
-Das Geburtstags-Recipe stellt seine Berechnung und Darstellung eigenständig bereit; **ob es ein Array \`upcoming_birthdays\`, \`upcoming\` oder \`birthdays\` für Merge bereitstellt, wurde noch nicht live verifiziert**. Das Template versucht diese Felder. Falls sie nicht vorhanden sind, bleibt eine sichtbare Meldung zur Datenzuordnung stehen, statt falsche Geburtstage zu erfinden. Gegebenenfalls muss das Recipe geforkt werden, um das berechnete Ergebnis als strukturierte Variable verfügbar zu machen.
+## Apple Calendar: sechs Kalender
 
-TRMNL-Plugin-Merge liefert bereits aufbereitete Plugin-Daten; mit dem vorliegenden Template wird **kein eigener Serverless-JavaScript-Lauf innerhalb von Plugin Merge** vorausgesetzt. Die Verarbeitung bleibt in den beiden bestehenden Polling-Quellen.
+Die gewünschte Quelle ist das [offizielle Apple-Calendar-Plugin](https://trmnl.com/integrations/apple-calendar/).
 
-Das gesamte Projekt liegt in einem Feature-Branch, um einen unbeabsichtigten Rollout auf das Küchendisplay zu vermeiden.
+| Kalender | Kürzel im Entwurf |
+| --- | --- |
+| Henrike | `H` |
+| Boy | `B` |
+| Jarne | `J` |
+| Marit | `M` |
+| Marit & Jarne | `M+J` |
+| Familie | `F` |
 
-## Relevante Dokumentation
+**Einrichtung:**
 
-- [TRMNL Plugin Strategies](https://help.trmnl.com/en/articles/17434705-plugin-strategies)
-- [Plugin-Instanzen als Formfelder](https://help.trmnl.com/en/articles/10513740-custom-plugin-form-builder)
-- [TRMNL X Guide](https://trmnl.com/framework/docs/3.4/trmnl_x_guide/)
-- [Private Plugin Import](https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins)
+1. In TRMNL die offizielle Apple-Calendar-Integration öffnen und verbinden. Verwende die dort angebotenen und zu deinem Apple-Konto passenden Authentifizierungsoptionen.
+2. Die sechs Familienkalender auswählen. Prüfen, dass Termine aus **allen sechs** Kalendern im Originalplugin erscheinen.
+3. Ganztagstermine, doppelt belegte Uhrzeiten, Termine über Mitternacht, wiederkehrende Termine und den nächsten Tag testen.
+4. Die Apple-Calendar-Instanz im Dashboard über `calendar_source` auswählen.
+5. Im **Dashboard → Edit Markup → Your Variables** die tatsächlich gelieferten Datenfelder öffnen: Wo liegt das **Ereignisarray**? Wie heißen **Titel**, **Startzeit**, **Ganztagskennzeichen** und **Kalendername**?
+6. Diese Schlüssel mit [`src/full.liquid`](src/full.liquid) abgleichen. Der Entwurf probiert für das Ereignisarray `events`, `data.events`, `calendar_events` und `data.calendar_events`; bei den einzelnen Terminen weitere Feldnamen. Falls die Quelle anders strukturiert ist, **Markup gezielt anpassen**.
+7. Erst danach die Kürzel und die chronologische Sortierung mit echten Beispielen aller sechs Kalender überprüfen.
+
+**Aktueller Code:** Es werden höchstens **sechs passende Termine** gerendert. Ganztagstermine erhalten „Ganzt.“. Fehlt eine Kalendernamen-Zuordnung oder lautet der Name anders, erscheint statt `H`/`B` usw. das Ersatzkürzel `–`. Mit `+ N weitere Termine` wird auf Überlauf hingewiesen.
+
+**Nicht als bestätigt ansehen:** Ob ein Termin direkt mit `calendar_name` geliefert wird, ob das native Plugin alle sechs Namen ausgibt und ob der aktuelle Filter bei sämtlichen Zeit-/Ganztagsformaten passt.
+
+## Geburtstage
+
+Geburtstage werden bewusst **nicht** aus Apple-Kontakten abgeleitet. Als eigenständige Quelle dient das [Birthday-Calendar-Recipe von Jasper](https://trmnl.com/recipes/birthday-calendar-225941).
+
+**Pflege im Recipe:** Das Recipe verlangt eine Geburtstagsliste im Format `Name ; YYYY-MM-DD` (mit Geburtsjahr) oder `Name ; MM-DD` (ohne Jahr) und bietet eine Altersanzeige sowie die Auswahl „nur innerhalb der nächsten zwei Wochen“, drei Wochen usw. **Keine echten Geburtsdaten im öffentlichen GitHub committen.**
+
+**Schritte:**
+
+1. Recipe in TRMNL installieren, bei Bedarf für eine bearbeitbare eigene Instanz **forken**.
+2. Geburtstage **nur dort** eintragen und jährliche Wiederholung im **eigenständigen Recipe** prüfen.
+3. Altersanzeige und gewünschten Zwei-Wochen-Zeitraum im Recipe einstellen.
+4. Die Instanz im Dashboard unter `birthday_source` auswählen.
+5. Im Merge unter **Your Variables** prüfen, ob die berechneten zukünftigen Geburtstage überhaupt als **strukturierte Array-Daten** verfügbar sind. Das reine gerenderte Kuchenmotiv des Recipes ist keine verwendbare Datenliste.
+6. Falls eine Liste vorhanden ist, tatsächliche Felder für **Name**, **nächster Geburtstag**, **Tage bis Geburtstag** und ggf. **Alter** ermitteln und die Liquid-Vorlage daran anpassen. Falls keine strukturierte Ausgabe existiert, muss das Recipe ggf. **im eigenen Fork erweitert** oder eine andere TRMNL-interne statische Datenquelle gewählt werden – **kein eigener Server**.
+
+**Was der aktuelle Entwurf wirklich kann:** Er zeigt maximal **zwei Einträge**, sofern ein Array unter `upcoming_birthdays`, `upcoming`, `birthdays` oder entsprechender `data.*`-Struktur vorhanden ist.
+
+**Was noch nicht umgesetzt bzw. verifiziert ist:** Der Dashboard-Code filtert Geburtstage **nicht selbst auf 14 Tage**, hebt einen Geburtstag **heute nicht gesondert hervor** und garantiert keine bereits berechnete Sortierung nach dem nächsten Datum. Das sind Abnahmepunkte für die spätere Integration. Die Recipe-Einstellung „nicht zeigen, wenn kein Geburtstag ansteht“ kann zudem die Verfügbarkeit als Merge-Quelle beeinflussen und muss mit echter Instanz getestet werden.
+
+## Wetter und Müll
+
+### Familienwetter
+
+Das eigenständige [Familienwetter-Plugin](../wetter/README.md) ruft Open-Meteo/DWD ab. Das Dashboard erwartet unter `weather_source` insbesondere:
+
+- `period.title`, `period.hours`, `period.temperature_range`, `period.description`, `period.precipitation_probability`
+- `current.temperature` – **Modellwert**, keine Ecowitt-Messung
+- `paths[]` mit `hours`, `status` und `text` für die Kitawege
+
+Wechsel der Wetterperioden **05–13**, **13–18** und **18–05 Uhr** erfolgt durch das Wetterplugin. Die Begrüßung im Dashboard läuft nach einer **eigenen** Uhrzeitlogik (darum kann der Gruß bereits „Feierabend“ heißen, während bis 18 Uhr noch Nachmittagswetter dargestellt wird).
+
+### Müllkalender Familie X
+
+Die [separate ABKI-Projektkopie](../muellkalender/README.md) liefert `next_two`: die **zwei chronologisch nächsten tatsächlichen Abholungen insgesamt**, nicht je Abfallart eine. Das Dashboard zeigt `label`, `weekday` und `date` an.
+
+**Achtung:** Der Müllblock steht im derzeitigen Full-Template **unabhängig von der Tageszeit** im rechten unteren Bereich. Eine ausdrücklich auf Morgen, Nachmittag und Abend begrenzte Sichtbarkeit ist **noch nicht als Bedingung programmiert**.
+
+## Zeitabhängiges Verhalten im Code
+
+Die Anzeige leitet Wochentag und Tageszeit in Liquid aus `now` und `trmnl.user.utc_offset` ab. Ein Realtest mit **Europe/Berlin** einschließlich Sommerzeitwechsel ist erforderlich.
+
+| Zeitraum | Gruß im Entwurf | Termine |
+| --- | --- | --- |
+| 05:00–07:59 | Guten Morgen | heutige Termine, soweit von der Quelle geliefert |
+| 08:00–12:59 | Unser Tag | heutige Termine |
+| 13:00–13:59 | Kita-Abholung | heutige noch relevante Termine |
+| 14:00–16:59 | Familienzeit | heutige noch relevante Termine |
+| 17:00–19:29 | Feierabend | heute und morgen |
+| ab 19:30 | Blick auf morgen | morgige Termine |
+| 00:00–04:59 | derzeit „Blick auf morgen“ | Termine des begonnenen Tages |
+| Samstag/Sonntag | Unser Wochenende (hat Vorrang) | grundsätzlich derselbe Tagesfilter |
+
+Das ist **eine gemeinsame dynamische Ansicht**, keine Sammlung von fünf separaten statischen Plugins. TRMNL aktualisiert sie beim nächsten Refresh, nicht zu jedem Minutenwechsel. Bei Gleichstand oder langen Termintiteln muss die Darstellung auf dem echten X geprüft werden.
+
+## Einrichtung und Datenzuordnung
+
+1. Die vier Quellplugins wie in der [Projekt-README](../README.md#inbetriebnahme-reihenfolge) beschrieben einrichten, unabhängig testen und `Force Refresh` auslösen.
+2. Aus **`projects/trmnl-x-familie/dashboard/src/`** ein **flaches ZIP** mit `settings.yml`, `full.liquid` und `shared.liquid` erstellen.
+3. In TRMNL eine **neue private Plugin-Instanz** importieren. Sie muss `Familien-Dashboard X` heißen und Strategie **Plugin Merge** nutzen.
+4. Nach dem Import die vier `plugin_instance_select`-Auswahlfelder befüllen. Wenn eine Instanz fehlt, diese vorübergehend in eine Playlist/ein Mashup aufnehmen.
+5. **Edit Markup → Your Variables** öffnen. Prüfen, ob unter `calendar_source`, `birthday_source`, `weather_source` und `trash_source` tatsächlich Objekte mit Daten erscheinen.
+6. **Zuerst Wetter und Müll prüfen:** `period`, `paths`, `next_two`. Für Kalender und Geburtstage die echten Datenfelder notieren und die oben beschriebenen Mapping-Stellen in `full.liquid` entsprechend ändern.
+7. In der Vorschau **TRMNL X, Full, Querformat** auswählen. Datum, lange Termintexte, Kürzel, Geburtstage, Wetterwarnungen, zwei Mülltermine und Fehlerzustände kontrollieren.
+8. Die Anzeige auf dem **physischen X** prüfen – insbesondere Kontrast der Graustufen, Abstand, Lesbarkeit aus etwa zwei Metern und abgeschnittene Wörter.
+9. Prüfen, wie sich das Layout morgens, 13 Uhr, 18 Uhr, nach 19:30 Uhr und am Wochenende verhält. Ein Test am Übergang zur Sommer-/Winterzeit ist für die Datumslogik sinnvoll.
+10. Erst nach erfolgreicher Abnahme das Dashboard in der gewünschten Playlist sichtbar machen. Vorherige Playlist beibehalten, um einfach zurückwechseln zu können.
+
+**GitHub Sync:** Für die neue Dashboard-Instanz ausschließlich den Ordner `projects/trmnl-x-familie/dashboard` verwenden. Nicht mit `plugins/muellkalender`, `plugins/helmbo-wetter` oder einem anderen Plugin-Ordner verbinden.
+
+## Fehlersuche
+
+| Symptom | Prüfen |
+| --- | --- |
+| Geburtstagszeile meldet „Datenzuordnung prüfen“ | Ist das Recipe verbunden? Gibt es ein strukturiertes Array? `Your Variables` ansehen |
+| Kalender leer, Originalplugin zeigt Termine | Merge-Keyname oder Eventarray/Datumsfelder weichen ab; nicht blind alle Feldnamen ersetzen |
+| Termine haben Kürzel `–` | tatsächliche Kalendernamen prüfen und `case event_owner` anpassen |
+| Termine am falschen Tag | Zeitformat, Zeitzone, `utc_offset`, Ganztagskennzeichen und Sommerzeit prüfen |
+| Wetter-/Müllbereich leer | Einzelplugin laden, `Force Refresh`, dann Merge-Zuordnung kontrollieren |
+| „Müllkalender verbinden / Plugin aktualisieren“ | versehentlich **Original** statt X-Projektkopie ausgewählt oder `next_two` fehlt |
+| Wetterzeitraum passt nicht zum Gruß | Gruß- und Wetterlogik haben absichtlich unterschiedliche Zeitfenster |
+| Text abgeschnitten | Full-Vorschau im X-Format, maximale Terminzahlen, CSS in `shared.liquid` prüfen |
+| Daten trotz erfolgreichem Quellplugin veraltet | Polling-Intervall, Plugin Health und TRMNL-Geräteabruf prüfen |
+
+## Abnahme- und Sicherheitskriterien
+
+Die Anzeige ist erst produktionsreif, wenn **alle vier** Quellen verbunden sind, die sechs Kalender korrekt gekennzeichnet werden, Geburtstage korrekt sortiert sind, die Wetterwarnungen plausible Werte liefern, die nächsten zwei Müllleerungen stimmen und das Bild auf dem echten TRMNL X sauber aussieht.
+
+In dieses Repository **keine Apple-Zugangsdaten, Familientermine, Geburtstagslisten oder Straßenadresse** eintragen. Die Cloud sieht die für die Anzeige übertragenen Daten; das ist bei der Entscheidung für TRMNL als alleinige Laufzeit bewusst zu berücksichtigen.
+
+## Referenzen
+
+- [TRMNL Plugin-Strategien / Plugin Merge](https://help.trmnl.com/en/articles/17434705-plugin-strategies)
+- [TRMNL Formularfelder / plugin_instance_select](https://help.trmnl.com/en/articles/10513740-custom-plugin-form-builder)
+- [Remix a Native Plugin](https://help.trmnl.com/en/articles/17506902-remix-a-native-plugin)
+- [Birthday Calendar Recipe](https://trmnl.com/recipes/birthday-calendar-225941)
+- [TRMNL X Framework](https://trmnl.com/framework/docs/3.4/trmnl_x_guide/)

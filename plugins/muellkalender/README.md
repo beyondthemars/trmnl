@@ -1,60 +1,123 @@
-# TRMNL Müllkalender – ABK Kiel
+# Müllkalender Kiel – eigenständiges TRMNL-Plugin
 
-Eigenständiges, kontrastreiches E-Ink-Plugin für **TRMNL OG und TRMNL X**, ohne Home Assistant und ohne eigenen Server. Es zeigt für Restmüll, Papier, Bioabfall und Gelben Sack jeweils den nächsten offiziellen ABK-Termin, den Wochentag und die verbleibenden Tage. Die nächste Leerung ist hervorgehoben.
+Dieses Plugin zeigt für eine in TRMNL hinterlegte Kieler Abholadresse **vier Abfallarten**: **Restmüll, Papier, Biomüll und Gelber Sack**. Für jede Abfallart wird der **nächste tatsächliche Abholtermin** aus den offiziellen ABKI-Kalenderdaten angezeigt. Die zeitlich nächste Leerung ist hervorgehoben.
 
-## Gestaltung – Minimal
+**Abgrenzung:** Dies ist das **Originalplugin** unter `plugins/muellkalender`. Das TRMNL-X-Familienprojekt besitzt [eine eigene Kopie](../../projects/trmnl-x-familie/muellkalender/README.md), die zusätzlich die **nächsten zwei Leerungen insgesamt** bereitstellt. Beide Plugin-Ordner und ihre TRMNL-Instanzen müssen unabhängig bleiben.
 
-Das Plugin verwendet ein zurückhaltendes E-Ink-Design mit viel Weißraum und klarer Typografie. Die vier Abfallarten erscheinen als schlichte Liste mit feinen Trennlinien, nicht mehr als umrahmte Karten. Die nächste Leerung wird durch eine hellgraue Fläche, eine schmale seitliche Linie und den Hinweis **„ALS NÄCHSTES“** markiert. Die Datenabfrage und Sortierung bleiben unverändert; Grautöne und Kontraste sind auch für den OG geeignet.
+## Funktionsumfang
 
-## Unterstützte Anzeigen
+- Vier Müllarten, jeweils mit nächstem gültigen Termin, Wochentag und verbleibenden Tagen.
+- Abholung am **heutigen Tag** bleibt bis zum Tageswechsel enthalten (`Heute`).
+- Berücksichtigt Feiertagsverschiebungen, soweit sie in den offiziellen ABKI-iCalendar-Einträgen enthalten sind.
+- Holt im **Dezember** zusätzlich das Folgejahr, um Termine über den Jahreswechsel hinweg zu erhalten.
+- Schätzt keine wöchentlichen oder zweiwöchentlichen Leerungsrhythmen; bei fehlenden Daten erscheint ein Fehler oder „Kein Termin“.
+- Keine Verbindung zu Home Assistant, keine zusätzliche Software, kein eigener Server.
 
-| Anzeige | Internes TRMNL-Layout | Darstellung |
-|---|---:|---|
-| TRMNL OG (Querformat) | 800 × 480 | Vier ruhige Listenzeilen, Datum rechts |
-| TRMNL X (Querformat) | 1040 × 780 (physisch 1872 × 1404) | Größere Typografie und mehr Weißraum |
-| TRMNL X (Hochformat) | 780 × 1040 (physisch 1404 × 1872) | Vier großzügige vertikale Reihen |
-| Half horizontal | OG und X | Vier kompakte Termine in zwei Spalten |
-| Half vertical | OG und X | Vier schlichte Zeilen |
-| Quadrant | OG und X | Vier minimalistische Bereiche im 2×2-Raster |
+## Anzeige und unterstützte Layouts
 
-Alle Vorlagen verwenden dieselben ABK-Daten, ohne eigene Geräteversion. Das gemeinsame CSS liegt in [src/shared.liquid](src/shared.liquid), die Liquid-Markups in [src](src). Die TRMNL-Gerätekennung bestimmt die Darstellung.
+| TRMNL-Ansicht | Umsetzung |
+| --- | --- |
+| Full (OG 800 × 480) | kontrastreiche Liste aller vier Müllarten |
+| Full (TRMNL X quer/hoch) | größere Fläche und angepasste Darstellung nach Geräteprofil |
+| Half horizontal | vier kompakte Termine |
+| Half vertical | vier kompakte Termine |
+| Quadrant | vier kompakte Termine |
 
-## Funktionsweise
+Die Liquid-Vorlagen liegen in [`src/`](src/) und das gemeinsame CSS in [`src/shared.liquid`](src/shared.liquid). Es werden überwiegend Weiß, Schwarz und klar unterscheidbare Graustufen verwendet. **Die physischen OG/X- und Hochformatansichten sind noch nicht auf allen Geräten abschließend geprüft**; eine TRMNL-Vorschau ersetzt den Gerätetest nicht.
 
-1. TRMNL pollt das ABK-Straßenverzeichnis anhand des in den Plugin-Einstellungen angegebenen Straßennamens.
-2. [src/transform.js](src/transform.js) läuft als TRMNL Serverless Node.js (20) und fragt die Hausnummern, Kalender-ID und ABK-iCalendar-Datei ab. Im Dezember wird zusätzlich das Folgejahr abgefragt.
-3. Das Script ermittelt jeweils den nächsten tatsächlichen Termin und liefert die Variablen für die Liquid-Vorlagen.
-4. Aktualisierung alle **12 Stunden** (`refresh_interval: 720`) oder manuell per **Force Refresh**.
+## Datenquelle und Ablauf
 
-Der ABK veröffentlicht auch die Abholtermine der Gelben Tonnen/Säcke durch Remondis. Feiertagsverschiebungen werden aus den offiziellen iCalendar-Einträgen übernommen. Das Plugin schätzt keine Abholrhythmen.
+Die externe Quelle ist der [Abfallwirtschaftsbetrieb Kiel (ABKI)](https://www.abki.de/dienste/entsorgung-und-recycling/beh%C3%A4lter/leerungstermine.html). Die dort bereitgestellten Angaben umfassen auch die Gelben Säcke/Tonnen, deren Abfuhr von Remondis durchgeführt wird.
 
-## Import und Test
+1. TRMNL pollt das **ABKI-Straßenverzeichnis**, gefiltert nach dem eingegebenen Straßennamen.
+2. [`src/transform.js`](src/transform.js) sucht den exakten Straßeneintrag und ermittelt über die ABKI-API die gültige Hausnummer bzw. Standort-ID.
+3. Die weitere Abfrage liefert einen Kalenderdatei-Verweis; das Skript lädt die **iCalendar-Datei**.
+4. `VEVENT`-Einträge mit `DTSTART` und `SUMMARY` werden auf Kalenderdatum und Müllart geprüft.
+5. Für jede der vier Kategorien wird der nächste Termin **ab heute** ausgewählt und die Liste nach Tagen bis zur Abholung sortiert.
+6. TRMNL gibt die Daten an die Liquid-Vorlagen weiter.
 
-1. In TRMNL **Plugins → Private Plugins → Import new** öffnen und ein flaches ZIP aus den Dateien in `src/` importieren: `settings.yml`, `transform.js`, `shared.liquid`, `full.liquid`, `half_horizontal.liquid`, `half_vertical.liquid` und `quadrant.liquid` (ohne Unterordner).
-2. In den Plugin-Einstellungen **Straße** und **Hausnummer** des Behälterstandorts eintragen. Diese Angaben gehören **nur in TRMNL**, nicht ins öffentliche GitHub-Repository.
-3. Prüfen: Strategie = **Polling**, Serverless Language = **Node**. Die Polling-URL beginnt mit `https://abki.de/abki-services/strassennamen` und enthält `{{ street | url_encode }}`.
-4. **Speichern** und **Force Refresh** ausführen. Unter **Edit Markup → Your Variables** sollten `bins`, `next_days` und `generated_at` erscheinen.
-5. Die **Full**-Vorschau zunächst im OG- und dann im X-Modell testen. Im X zusätzlich Portrait prüfen. Die drei kleinen Ansichten stehen in den jeweiligen Tabs bereit.
-6. Plugin in die Playlist aufnehmen. Bei Fehlern unter Plugin-Einstellungen **Debug Logs** aktivieren.
+Die URL-Aufrufe erfolgen bei **TRMNL**. Das Serverless-Skript nutzt JavaScript/Node (ohne externe NPM-Pakete). Die Mehrfachabfrage hat im Code einen Abbruch-Timer von etwa **4,3 Sekunden**; ein langsamer ABKI-Dienst kann daher einen Zeitlimit-Fehler auslösen.
 
-**Für ein bereits verbundenes Plugin:** Repository-Ordner `plugins/muellkalender` im TRMNL-GitHub-Sync verwenden und die neuen `src/`-Dateien von `main` übernehmen; ein zweites Plugin ist nicht nötig.
+## Technische Einstellungen
 
-### Fehlermeldungen
+| Feld | Konfiguration |
+| --- | --- |
+| Pluginname | `Müllkalender Kiel` |
+| Datenstrategie | `polling` |
+| Polling-URL | `https://abki.de/abki-services/strassennamen` mit Straßenfilter |
+| Serverless | `node`, [`src/transform.js`](src/transform.js) |
+| Aktualisierung | `refresh_interval: 720` = **alle 12 Stunden** |
+| Zeitzone bei Terminen | `Europe/Berlin` |
+| Formularfelder | `street` (Straße), `house_number` (Hausnummer) |
+| Framework-Version | 3.4.6 |
 
-- `Bitte Straße und Hausnummer ...`: Beide Formfelder sind noch leer.
-- `Straße nicht im ABK-Verzeichnis`: Schreibweise oder die Polling-Antwort überprüfen.
-- `Hausnummer ... nicht hinterlegt`: Adresse auf der offiziellen ABK-Seite kontrollieren; gegebenenfalls abweichender Behälterstandort.
-- `Zeitlimit überschritten`: Die mehrstufige ABK-Abfrage war für TRMNL Serverless zu langsam.
-- `Kein Termin`: Für die Fraktion enthält die Abfrage keine künftigen Leerungen; es wird nichts geschätzt.
+**Datenschutz:** Trage die echte Straße und Hausnummer nur in deiner **TRMNL-Plugin-Instanz** ein. Der Quellcode enthält lediglich Platzhalter; persönliche Anschriften gehören nicht in `settings.yml`, Tests oder das GitHub-Repository.
 
-## Teststatus
+## Einrichtung Schritt für Schritt
 
-Der Direktabruf zeigte bei einem ersten echten TRMNL-Test vier Abfalltermine und eine korrekt sortierte Vollbildansicht. Die universellen OG/X-Vorlagen sind im Repository hinterlegt, **aber noch nicht auf beiden physischen Modellen geprüft**. Ein erster Preview-Test auf OG und X inklusive Portrait ist daher sinnvoll.
+1. TRMNL öffnen und das gewünschte Gerät auswählen.
+2. Unter **Plugins → Private Plugins** das bestehende Plugin öffnen – oder bei einer Erstinstallation **Import new** verwenden.
+3. Für einen Import aus `src/` ein **flaches ZIP** erstellen: `settings.yml`, `transform.js`, `shared.liquid`, `full.liquid`, `half_horizontal.liquid`, `half_vertical.liquid`, `quadrant.liquid`. **Keinen übergeordneten Ordner** in das ZIP aufnehmen.
+4. In den Plugin-Einstellungen **Straße** und **Hausnummer** des Abholstandorts hinterlegen (keine Postleitzahl erforderlich).
+5. Strategie **Polling**, Serverless **Node** und die ABKI-Polling-URL kontrollieren. Dann speichern.
+6. **Force Refresh** auslösen und **Edit Markup → Your Variables** öffnen.
+7. Prüfen, dass `error` leer ist und dass `bins` die vier Abfallarten mit nachvollziehbarem Datum enthält. Keine echten Abholtermine aus Beispielwerten übernehmen.
+8. Im Markup-Editor **Full**, **Half horizontal**, **Half vertical** und **Quadrant** anschauen; in der Vorschau passende OG-/X-Gerätegröße und gegebenenfalls Portrait ausprobieren.
+9. Plugin in die TRMNL-Playlist aufnehmen und die Anzeige **am echten Gerät** verifizieren.
 
-## Links
+Wenn bereits eine TRMNL-Instanz mit GitHub Sync auf `plugins/muellkalender` eingerichtet ist, **diese Instanz weiterverwenden**. Ein Import des Familienprojekt-Müllkalenders ist **kein Update** dieses Plugins und darf dessen Sync-Zuordnung nicht ersetzen.
 
-- [Offizielle ABK-Leerungstermine](https://www.abki.de/dienste/entsorgung-und-recycling/beh%C3%A4lter/leerungstermine.html)
-- [Waste Collection Schedule – ABK-Implementierung](https://github.com/mampfes/hacs_waste_collection_schedule/blob/master/custom_components/waste_collection_schedule/waste_collection_schedule/source/abki_de.py)
-- [TRMNL X Guide](https://trmnl.com/framework/docs/3.4/trmnl_x_guide/)
-- [TRMNL Plugin-Import](https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins)
-- [TRMNL GitHub Sync](https://help.trmnl.com/en/articles/15977899-github-sync)
+## Rückgabewerte
+
+Das Serverless-Skript liefert unter anderem:
+
+| Variable | Bedeutung |
+| --- | --- |
+| `bins` | Array mit **vier** Abfallarten, nach nächstem Abholtermin sortiert |
+| `bins[].id` | `rest`, `paper`, `bio` oder `yellow` |
+| `bins[].label` | lesbarer Name der Abfallart |
+| `bins[].weekday` | Wochentag, z. B. `Di` |
+| `bins[].date` | Datum ohne Jahr, z. B. `24.11.` |
+| `bins[].days` | Tage bis zur nächsten Abholung; `9999` bei fehlendem Termin |
+| `bins[].relative` | `Heute`, `Morgen`, `in N Tagen` oder `Kein Termin` |
+| `next_days` | Tage bis zur allerersten Leerung, sonst `-1` |
+| `generated_at` | Zeitpunkt der letzten Datenaufbereitung |
+| `source` | Quellhinweis `ABK Kiel / Remondis` |
+| `error` | leer bei Erfolg, sonst verständlicher Fehlertext |
+
+**Nicht vorhanden:** `next_two` gehört ausschließlich zur **X-Projektkopie**, nicht zu diesem Original.
+
+## Fehlerbehebung
+
+| Meldung/Symptom | Prüfpunkt |
+| --- | --- |
+| „Bitte Straße und Hausnummer ...“ | Beide Formularfelder ausfüllen, erneut speichern |
+| „Straße nicht im ABK-Verzeichnis gefunden“ | Schreibweise im ABKI-Straßenverzeichnis vergleichen |
+| „Hausnummer ... nicht hinterlegt“ | Richtiges Grundstück bzw. abweichenden Behälterstandort prüfen |
+| „Kein ABK-Kalender“ / „Keine ABK-Leerungen“ | ABKI-Abfrage, Kalenderjahr und Dienstverfügbarkeit prüfen |
+| „Zeitlimit überschritten“ | ABKI-Server oder mehrstufige Abfrage zu langsam; später `Force Refresh` wiederholen |
+| Leere Vorschau trotz Daten | `bins`, `error`, Liquid-Markup und Debug Logs prüfen |
+| Leerungen scheinen veraltet | 12-Stunden-Intervall beachten; manuell refreshen und mit ABKI-Seite vergleichen |
+
+Wenn die API ihr Format ändert, zuerst den Parser und die Mocktests prüfen; **keine Termine anhand des bisherigen Rhythmus erfinden**.
+
+## Tests
+
+Lokaler *Entwicklungs*-Test mit Node.js:
+
+~~~sh
+node plugins/muellkalender/tests/test.mjs
+~~~
+
+Der Test simuliert ABKI-Antworten und prüft Auswahl, Sortierung und Fehlerbehandlung. Er ist **kein Live-Abruf** und beweist nicht, dass die Website dauerhaft unverändert bleibt. Im produktiven Betrieb wird **kein Node-Prozess zu Hause** benötigt.
+
+## Dateien und Wartung
+
+- [`src/settings.yml`](src/settings.yml): Polling-URL, Formular und Intervall.
+- [`src/transform.js`](src/transform.js): ABKI-Abfrage und Auswahl des nächsten Termins je Kategorie.
+- [`src/shared.liquid`](src/shared.liquid): gemeinsames CSS.
+- [`src/full.liquid`](src/full.liquid), [Half horizontal](src/half_horizontal.liquid), [Half vertical](src/half_vertical.liquid), [Quadrant](src/quadrant.liquid): Layouts.
+- [`tests/test.mjs`](tests/test.mjs): Mocktests.
+- [`.trmnlp.yml`](.trmnlp.yml): optionale lokale Entwicklungs-Konfiguration.
+
+Offizielle Referenzen: [ABKI Leerungstermine](https://www.abki.de/dienste/entsorgung-und-recycling/beh%C3%A4lter/leerungstermine.html), [TRMNL Plugin-Import](https://help.trmnl.com/en/articles/10542599-importing-and-exporting-private-plugins), [TRMNL GitHub Sync](https://help.trmnl.com/en/articles/15977899-github-sync).
