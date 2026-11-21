@@ -55,7 +55,11 @@
 {% assign events = calendar_source.events | default: calendar_source.data.events | default: calendar_source.calendar_events | default: calendar_source.data.calendar_events %}
 {% assign upcoming_events = "" | split: "" %}
 {% if events %}
-  {% assign ordered = events | sort: "start_full" %}
+  {% assign ordered = events %}
+  {% if events.first.start_full %}{% assign ordered = events | sort: "start_full" %}
+  {% elsif events.first.date_time %}{% assign ordered = events | sort: "date_time" %}
+  {% elsif events.first.start_at %}{% assign ordered = events | sort: "start_at" %}
+  {% elsif events.first.start %}{% assign ordered = events | sort: "start" %}{% endif %}
   {% for event in ordered %}
     {% assign event_start = event.start_full | default: event.date_time | default: event.start_at | default: event.start | default: event.date %}
     {% assign event_local_epoch = event_start | date: "%s" | plus: trmnl.user.utc_offset %}
@@ -85,7 +89,7 @@
     <span class="fx__birthday-icon" aria-hidden="true">✳</span>
     <div>
       <div class="fx__birthday-title">GEBURTSTAGE</div>
-      {% if upcoming and upcoming.size > 0 %}
+      {% if upcoming and upcoming.first %}
         {% for birthday in upcoming limit: 2 %}
           {% assign birthday_name = birthday.name | default: birthday.title | default: birthday.person %}
           {% assign birthday_date = birthday.next_date | default: birthday.date | default: birthday.birthdate %}
@@ -100,7 +104,7 @@
   </div>
   <div class="fx__main">
     <section class="fx__agenda">
-      <div class="fx__section">{% if late %}Termine für morgen{% elsif hour >= 17 %}Heute &amp; morgen{% else %}Familienkalender heute{% endif %}</div>
+      <div class="fx__section">{% if late and hour < 5 %}Termine für heute{% elsif late %}Termine für morgen{% elsif hour >= 17 %}Heute &amp; morgen{% else %}Familienkalender heute{% endif %}</div>
       <div class="fx__events">
         {% if upcoming_events.size > 0 %}
           {% for event in upcoming_events limit: 6 %}
