@@ -1,0 +1,23 @@
+name: TRMNL plugin checks
+on:
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/trmnl-plugins-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+      - '.github/workflows/trmnl-plugins-tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: ABKI mock tests
+        run: node plugins/muellkalender/tests/test.mjs
+      - name: Family weather mock tests
+        run: node plugins/familienwetter/tests/test.mjs
