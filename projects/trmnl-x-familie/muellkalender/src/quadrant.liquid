@@ -1,0 +1,45 @@
+<div class="layout mc mc--quadrant">
+  <div class="mc-head">
+    <div class="mc-head-copy">
+      
+      <h2 class="mc-heading">Müllkalender</h2>
+    </div>
+    <span class="mc-location">ABK Kiel</span>
+  </div>
+
+  {% if error and error != "" %}
+    <div class="mc-message">{{ error }}</div>
+  {% elsif bins and bins.size > 0 %}
+    <div class="mc-grid">
+      {% for bin in bins %}
+        <div class="mc-card{% if bin.days == next_days %} is-next{% endif %}">
+          <div class="mc-icon mc-icon--{{ bin.id }}" aria-hidden="true">
+            <div class="mc-icon-inner"></div>
+          </div>
+          <div class="mc-info">
+            <div class="mc-name-row">
+              <span class="mc-type">{{ bin.label }}</span>
+              {% if bin.days == next_days %}
+                <span class="mc-next">ALS NÄCHSTES</span>
+              {% endif %}
+            </div>
+            <span class="mc-detail">
+              {% case bin.id %}
+                {% when 'rest' %}Schwarze Tonne
+                {% when 'paper' %}Blaue Tonne
+                {% when 'bio' %}Braune Tonne
+                {% when 'yellow' %}Leichtverpackungen
+              {% endcase %}
+            </span>
+          </div>
+          <div class="mc-right">
+            <span class="mc-date">{{ bin.weekday }}{% if bin.weekday != "" %}, {% endif %}{{ bin.date }}</span>
+            <span class="mc-relative">{{ bin.relative }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="mc-message">Keine Abholtermine vorhanden.</div>
+  {% endif %}
+</div>

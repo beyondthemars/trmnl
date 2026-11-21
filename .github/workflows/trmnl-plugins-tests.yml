@@ -1,13 +1,13 @@
-name: TRMNL plugin checks
+name: TRMNL X family dashboard checks
 on:
   pull_request:
     paths:
-      - 'plugins/**'
+      - 'projects/trmnl-x-familie/**'
       - '.github/workflows/trmnl-plugins-tests.yml'
   push:
     branches: [main]
     paths:
-      - 'plugins/**'
+      - 'projects/trmnl-x-familie/**'
       - '.github/workflows/trmnl-plugins-tests.yml'
 jobs:
   test:
@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: ABKI mock tests
-        run: node plugins/muellkalender/tests/test.mjs
+      - name: ABKI family project mock tests
+        run: node projects/trmnl-x-familie/muellkalender/tests/test.mjs
       - name: Family weather mock tests
-        run: node plugins/familienwetter/tests/test.mjs
+        run: node projects/trmnl-x-familie/wetter/tests/test.mjs

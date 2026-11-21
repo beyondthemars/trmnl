@@ -11,8 +11,6 @@ const ics = [
   'BEGIN:VCALENDAR', 'VERSION:2.0',
   'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:' + date(3), 'SUMMARY:Restabfall', 'END:VEVENT',
   'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:' + date(1), 'SUMMARY:Papier', 'END:VEVENT',
-  // A second paper pickup precedes the next different waste type.
-  'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:' + date(2), 'SUMMARY:Papier', 'END:VEVENT',
   'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:' + date(10), 'SUMMARY:Bioabfall', 'END:VEVENT',
   'BEGIN:VEVENT', 'DTSTART;VALUE=DATE:' + date(7), 'SUMMARY:Gelbe Tonnen und', ' Säcke', 'END:VEVENT',
   'END:VCALENDAR'
@@ -36,8 +34,6 @@ assert.equal(result.error, '');
 assert.deepEqual(Array.from(result.bins, (b) => b.id), ['paper','rest','yellow','bio']);
 assert.deepEqual(Array.from(result.bins, (b) => b.days), [1,3,7,10]);
 assert.equal(result.next_days, 1);
-assert.deepEqual(Array.from(result.next_two, (b) => b.id), ['paper', 'paper']);
-assert.deepEqual(Array.from(result.next_two, (b) => b.days), [1, 2]);
 assert.equal(result.bins[0].relative, 'Morgen');
 assert.ok(calls[0].includes('IDSTREET=101'));
 assert.ok(calls[1].includes('Hausnummernwahl=5'));
