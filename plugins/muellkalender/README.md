@@ -32,6 +32,9 @@ Alle vier Abholarten verwenden die **gleiche Zeilenstruktur**: links ein dezente
 - Das bisherige **„ALS NÄCHSTES“** entfällt vollständig.
 - Kein grauer Kartenhintergrund, keine senkrechte Hervorhebungsleiste und keine dicken Umrandungen.
 - Nur dünne Trennlinien, Weißraum und klare Typografie.
+- **Inter Variable** statt der gröberen TRMNL-Pixel-Typografie – einheitlich auf OG und X.
+- „Kiel · Abfuhrtermine“ im Full-Layout vergrößert und in normaler Schreibweise.
+- Die kleinen Untertitel wie „Schwarze Tonne“ und „Leichtverpackungen“ in allen Ansichten entfernt.
 - Alle vier Liquid-Ansichten verwenden diese Hierarchie; OG, X und Portrait bleiben unterstützt.
 - Der Code zur ABKI-Abfrage und die Plugin-Einstellungen sind unverändert.
 
