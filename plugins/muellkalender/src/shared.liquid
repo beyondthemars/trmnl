@@ -1,8 +1,9 @@
 <style>
 /*
- * Müllkalender · Minimal
- * Universelles monochromes Layout für TRMNL OG, X, Portrait und Mashups.
- * Bewusst ohne harte Kartenrahmen, Schatten, Farben oder externe Fonts.
+ * Müllkalender / Minimal 2
+ * Ein Layout für alle vier Abfallarten: die erste gültige Leerung erhält
+ * nur mehr Schriftgröße und Raum. Keine Badges, Hintergründe oder Kartenrahmen.
+ * TRMNL OG, TRMNL X (quer/hoch) und Mashups.
  */
 .layout.mc {
   display:flex;
@@ -16,214 +17,265 @@
   margin:0;
   gap:12px;
   overflow:hidden;
-  color:#121212;
   background:#fff;
+  color:#171717;
   font-family:Inter,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
 }
 .mc, .mc * { box-sizing:border-box; }
 .mc-head {
   display:flex;
-  justify-content:space-between;
   align-items:flex-end;
+  justify-content:space-between;
   flex:0 0 auto;
   min-width:0;
-  gap:14px;
-  padding:3px 5px 8px;
+  gap:12px;
+  padding:3px 8px 13px;
 }
-.mc-head-copy { display:flex; flex-direction:column; min-width:0; gap:5px; }
+.mc-head-copy { min-width:0; display:flex; flex-direction:column; gap:7px; }
 .mc-overline {
-  font-size:11px;
-  line-height:1;
-  letter-spacing:1.45px;
+  font-size:10px;
   font-weight:650;
+  letter-spacing:1.5px;
+  line-height:1;
+  color:#696969;
   text-transform:uppercase;
-  color:#5b5b5b;
 }
 .mc-heading {
   margin:0;
   padding:0;
-  font-size:34px;
+  font-size:33px;
   font-weight:740;
   letter-spacing:-1.1px;
   line-height:1.05;
   white-space:nowrap;
 }
-.mc-location { font-size:13px; line-height:1.1; color:#666; font-weight:550; white-space:nowrap; }
+.mc-location { font-size:12px; font-weight:550; color:#777; white-space:nowrap; }
 .mc-grid {
-  display:grid;
   flex:1 1 auto;
+  display:grid;
   min-height:0;
   grid-template-columns:minmax(0,1fr);
-  grid-template-rows:repeat(4,minmax(0,1fr));
-  gap:0;
+  grid-template-rows:minmax(0,1.35fr) repeat(3,minmax(0,1fr));
 }
 .mc-card {
-  position:relative;
   display:flex;
   align-items:center;
+  position:relative;
   min-width:0;
   min-height:0;
-  gap:16px;
-  padding:8px 15px;
-  background:#fff;
-  border-bottom:1px solid #cecece;
+  gap:18px;
+  padding:7px 12px;
+  background:transparent;
+  border:0;
+  border-bottom:1px solid #d4d4d4;
   border-radius:0;
 }
-.mc-card:last-child { border-bottom-color:transparent; }
-.mc-card.is-next {
-  background:#ededed;
-  border-bottom-color:transparent;
-  border-radius:11px;
-  padding-left:18px;
+.mc-card:last-child { border-bottom:0; }
+/* Genau dieselbe Komposition wie die übrigen Zeilen, nur größer. */
+.mc-card.is-next { gap:21px; }
+.mc-icon {
+  position:relative;
+  display:block;
+  flex:0 0 35px;
+  width:35px;
+  height:40px;
 }
-.mc-card.is-next:before {
-  content:"";
-  position:absolute;
-  left:0;
-  top:21%;
-  bottom:21%;
-  width:3px;
-  border-radius:3px;
-  background:#111;
-}
-.mc-icon { position:relative; flex:0 0 36px; width:36px; height:41px; }
 .mc-icon:before {
   content:"";
   position:absolute;
+  top:5px;
   left:2px;
-  top:6px;
-  width:32px;
+  width:31px;
   height:6px;
-  border:1.8px solid #1c1c1c;
-  border-radius:2px;
   background:#fff;
+  border:1.7px solid #252525;
+  border-radius:2px;
 }
 .mc-icon:after {
   content:"";
   position:absolute;
+  top:1px;
   left:12px;
-  top:2px;
-  width:12px;
+  width:11px;
   height:4px;
+  background:#252525;
   border-radius:2px 2px 0 0;
-  background:#1c1c1c;
 }
 .mc-icon-inner {
   position:absolute;
-  top:14px;
+  top:13px;
   left:5px;
-  width:26px;
+  width:25px;
   height:25px;
-  border:1.8px solid #1c1c1c;
-  border-radius:2px 2px 4px 4px;
+  border:1.7px solid #252525;
+  border-radius:1px 1px 4px 4px;
 }
-.mc-icon--rest .mc-icon-inner { background:#1b1b1b; }
+.mc-icon--rest .mc-icon-inner { background:#222; }
 .mc-icon--paper .mc-icon-inner { background:repeating-linear-gradient(0deg,#fff 0 5px,#222 5px 6.5px); }
 .mc-icon--bio .mc-icon-inner { background:repeating-linear-gradient(135deg,#fff 0 5px,#222 5px 6.5px); }
-.mc-icon--yellow .mc-icon-inner { background:radial-gradient(#222 1.2px,#fff 1.8px) 0 0/7px 7px; }
+.mc-icon--yellow .mc-icon-inner { background:radial-gradient(#222 1.25px,#fff 1.85px) 0 0/7px 7px; }
+.mc-card.is-next .mc-icon { transform:scale(1.18); transform-origin:center; }
 .mc-info { flex:1 1 auto; min-width:0; }
-.mc-name-row { display:flex; flex-wrap:wrap; align-items:baseline; column-gap:11px; row-gap:2px; }
-.mc-type { display:block; font-size:24px; font-weight:730; letter-spacing:-.65px; line-height:1.12; white-space:nowrap; }
-.mc-next { color:#333; font-size:10px; line-height:1.2; font-weight:750; letter-spacing:.75px; white-space:nowrap; }
-.mc-detail { display:block; color:#616161; font-size:12px; font-weight:460; line-height:1.18; margin-top:4px; white-space:nowrap; }
-.mc-right { flex:0 0 auto; min-width:139px; text-align:right; }
-.mc-date { display:block; font-size:25px; font-weight:720; letter-spacing:-.45px; line-height:1.07; white-space:nowrap; font-variant-numeric:tabular-nums; }
-.mc-relative { display:block; color:#666; font-size:14px; font-weight:570; line-height:1.15; margin-top:4px; white-space:nowrap; }
-.mc-card.is-next .mc-relative { color:#111; font-weight:700; }
-.mc-footer { flex:0 0 auto; text-align:right; color:#777; padding:1px 5px 0; font-size:11px; line-height:1.1; white-space:nowrap; }
-.mc-message { margin:auto; padding:16px; max-width:100%; font-size:18px; font-weight:650; line-height:1.3; text-align:center; overflow-wrap:anywhere; }
+.mc-type {
+  display:block;
+  margin:0;
+  padding:0;
+  font-size:22px;
+  font-weight:690;
+  letter-spacing:-.5px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+.mc-detail {
+  display:block;
+  margin-top:5px;
+  color:#777;
+  font-size:12px;
+  font-weight:460;
+  line-height:1.15;
+  white-space:nowrap;
+}
+.mc-right {
+  flex:0 0 auto;
+  min-width:155px;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.mc-date {
+  display:block;
+  font-size:25px;
+  font-weight:710;
+  letter-spacing:-.5px;
+  line-height:1.08;
+  white-space:nowrap;
+}
+.mc-relative {
+  display:block;
+  margin-top:5px;
+  color:#777;
+  font-size:13px;
+  font-weight:550;
+  line-height:1.2;
+  white-space:nowrap;
+}
+/* Die wichtigste Leerung: etwas mehr Raum und erkennbare Größenhierarchie. */
+.mc-card.is-next .mc-type { font-size:30px; font-weight:760; letter-spacing:-.9px; }
+.mc-card.is-next .mc-detail { font-size:13px; }
+.mc-card.is-next .mc-date { font-size:34px; font-weight:760; letter-spacing:-.9px; }
+.mc-card.is-next .mc-relative { font-size:16px; font-weight:650; color:#333; }
+.mc-footer {
+  flex:0 0 auto;
+  text-align:right;
+  padding:1px 8px 0;
+  font-size:10px;
+  font-weight:450;
+  line-height:1.1;
+  color:#888;
+  white-space:nowrap;
+}
+.mc-message { margin:auto; padding:14px; font-size:18px; line-height:1.3; font-weight:650; text-align:center; overflow-wrap:anywhere; }
 
-/* TRMNL X (1040 × 780 logische Pixel). */
-.screen--v2 .mc--full { gap:19px; }
-.screen--v2 .mc--full .mc-head { padding:9px 10px 16px; }
-.screen--v2 .mc--full .mc-head-copy { gap:10px; }
+/* TRMNL X – gleiche Struktur, dem größeren Display entsprechend skaliert. */
+.screen--v2 .mc--full { gap:22px; }
+.screen--v2 .mc--full .mc-head { padding:8px 16px 21px; }
+.screen--v2 .mc--full .mc-head-copy { gap:12px; }
 .screen--v2 .mc--full .mc-overline { font-size:16px; letter-spacing:2px; }
-.screen--v2 .mc--full .mc-heading { font-size:51px; letter-spacing:-1.6px; }
-.screen--v2 .mc--full .mc-location { font-size:19px; }
-.screen--v2 .mc--full .mc-card { gap:25px; padding:17px 26px; }
-.screen--v2 .mc--full .mc-card.is-next { padding-left:31px; border-radius:17px; }
-.screen--v2 .mc--full .mc-card.is-next:before { width:4px; }
-.screen--v2 .mc--full .mc-icon { transform:scale(1.32); flex-basis:56px; transform-origin:left center; }
-.screen--v2 .mc--full .mc-type { font-size:36px; letter-spacing:-1px; }
+.screen--v2 .mc--full .mc-heading { font-size:52px; letter-spacing:-1.7px; }
+.screen--v2 .mc--full .mc-card { gap:29px; padding:13px 23px; border-bottom-width:1.5px; }
+.screen--v2 .mc--full .mc-card.is-next { gap:33px; }
+.screen--v2 .mc--full .mc-icon { transform:scale(1.35); transform-origin:left center; flex-basis:55px; }
+.screen--v2 .mc--full .mc-card.is-next .mc-icon { transform:scale(1.60); }
+.screen--v2 .mc--full .mc-type { font-size:32px; letter-spacing:-.85px; }
 .screen--v2 .mc--full .mc-detail { font-size:17px; margin-top:7px; }
-.screen--v2 .mc--full .mc-next { font-size:13px; }
-.screen--v2 .mc--full .mc-right { min-width:225px; }
-.screen--v2 .mc--full .mc-date { font-size:38px; }
-.screen--v2 .mc--full .mc-relative { font-size:20px; margin-top:7px; }
-.screen--v2 .mc--full .mc-footer { font-size:15px; padding:4px 10px 0; }
+.screen--v2 .mc--full .mc-date { font-size:35px; }
+.screen--v2 .mc--full .mc-relative { font-size:18px; margin-top:7px; }
+.screen--v2 .mc--full .mc-right { min-width:250px; }
+.screen--v2 .mc--full .mc-card.is-next .mc-type { font-size:43px; }
+.screen--v2 .mc--full .mc-card.is-next .mc-detail { font-size:19px; }
+.screen--v2 .mc--full .mc-card.is-next .mc-date { font-size:47px; }
+.screen--v2 .mc--full .mc-card.is-next .mc-relative { font-size:22px; }
+.screen--v2 .mc--full .mc-footer { font-size:14px; padding:4px 15px 0; }
 
-/* TRMNL X Hochformat. Vier Reihen bleiben untereinander. */
-.screen--portrait .mc--full .mc-head { align-items:flex-start; flex-direction:column; gap:6px; }
-.screen--portrait .mc--full .mc-location { text-align:left; }
-.screen--v2.screen--portrait .mc--full .mc-card { padding-top:28px; padding-bottom:28px; }
+/* TRMNL X im Hochformat: mehr vertikaler Platz, gleiche Reihenfolge. */
+.screen--portrait .mc--full .mc-head { align-items:flex-start; flex-direction:column; }
 .screen--v2.screen--portrait .mc--full .mc-heading { font-size:54px; }
-.screen--v2.screen--portrait .mc--full .mc-type { font-size:36px; }
-.screen--v2.screen--portrait .mc--full .mc-date { font-size:34px; }
-.screen--v2.screen--portrait .mc--full .mc-right { min-width:199px; }
+.screen--v2.screen--portrait .mc--full .mc-grid { grid-template-rows:minmax(0,1.32fr) repeat(3,minmax(0,1fr)); }
+.screen--v2.screen--portrait .mc--full .mc-card { padding-top:24px; padding-bottom:24px; }
+.screen--v2.screen--portrait .mc--full .mc-right { min-width:218px; }
+.screen--v2.screen--portrait .mc--full .mc-date { font-size:33px; }
+.screen--v2.screen--portrait .mc--full .mc-card.is-next .mc-date { font-size:43px; }
 
-/* Mashups – dieselbe schlichte Gestaltung, mit weniger Details. */
+/* Half horizontal (800×240): zwei Reihen mit je zwei Abholarten. */
 .mc--half-h, .mc--half-v, .mc--quadrant { gap:5px; }
-.mc--half-h .mc-head, .mc--half-v .mc-head, .mc--quadrant .mc-head { padding:0 3px 3px; align-items:center; }
+.mc--half-h .mc-head, .mc--half-v .mc-head, .mc--quadrant .mc-head { padding:0 3px 5px; align-items:center; }
+.mc--half-h .mc-heading, .mc--half-v .mc-heading, .mc--quadrant .mc-heading { font-size:19px; letter-spacing:-.55px; }
 .mc--half-h .mc-overline, .mc--half-v .mc-overline, .mc--quadrant .mc-overline { display:none; }
-.mc--half-h .mc-heading, .mc--half-v .mc-heading, .mc--quadrant .mc-heading { font-size:19px; letter-spacing:-.5px; }
 .mc--half-h .mc-location, .mc--half-v .mc-location, .mc--quadrant .mc-location { font-size:11px; }
-.mc--half-h .mc-next, .mc--half-v .mc-next, .mc--quadrant .mc-next { display:none; }
-
-/* Halbe Breite mit zwei Spalten: Typ und Datum untereinander. */
-.mc--half-h .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); column-gap:12px; }
-.mc--half-h .mc-card { gap:7px; padding:5px 6px; }
-.mc--half-h .mc-card.is-next { padding-left:9px; border-radius:7px; }
-.mc--half-h .mc-icon { flex-basis:29px; transform:scale(.74); transform-origin:left center; }
-.mc--half-h .mc-info { flex:1 1 auto; }
-.mc--half-h .mc-type { font-size:17px; }
+.mc--half-h .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); column-gap:13px; }
+.mc--half-h .mc-card { gap:7px; padding:4px 7px; }
+.mc--half-h .mc-card.is-next { gap:7px; }
+.mc--half-h .mc-icon, .mc--half-h .mc-card.is-next .mc-icon { transform:scale(.78); transform-origin:left center; flex-basis:28px; }
 .mc--half-h .mc-detail { display:none; }
-.mc--half-h .mc-right { flex:0 0 auto; min-width:91px; }
-.mc--half-h .mc-date { font-size:16px; }
+.mc--half-h .mc-type { font-size:17px; letter-spacing:-.35px; }
+.mc--half-h .mc-right { min-width:94px; }
+.mc--half-h .mc-date { font-size:17px; letter-spacing:-.25px; }
 .mc--half-h .mc-relative { font-size:11px; margin-top:3px; }
+.mc--half-h .mc-card.is-next .mc-type { font-size:20px; letter-spacing:-.45px; }
+.mc--half-h .mc-card.is-next .mc-date { font-size:20px; letter-spacing:-.4px; }
+.mc--half-h .mc-card.is-next .mc-relative { font-size:12px; }
 
-/* Halbe Hochansicht mit vier klar getrennten Reihen. */
-.mc--half-v .mc-card { gap:8px; padding:3px 7px; }
-.mc--half-v .mc-card.is-next { padding-left:10px; border-radius:7px; }
-.mc--half-v .mc-icon { flex-basis:27px; transform:scale(.70); transform-origin:left center; }
-.mc--half-v .mc-type { font-size:18px; }
+/* Half vertical (400×480): vier kompakte Zeilen. */
+.mc--half-v .mc-grid { grid-template-rows:minmax(0,1.16fr) repeat(3,minmax(0,1fr)); }
+.mc--half-v .mc-card, .mc--half-v .mc-card.is-next { gap:7px; padding:4px 6px; }
+.mc--half-v .mc-icon, .mc--half-v .mc-card.is-next .mc-icon { transform:scale(.73); transform-origin:left center; flex-basis:27px; }
 .mc--half-v .mc-detail { display:none; }
+.mc--half-v .mc-type { font-size:17px; }
 .mc--half-v .mc-right { min-width:92px; }
 .mc--half-v .mc-date { font-size:17px; }
-.mc--half-v .mc-relative { font-size:12px; margin-top:3px; }
+.mc--half-v .mc-relative { font-size:11px; margin-top:3px; }
+.mc--half-v .mc-card.is-next .mc-type { font-size:21px; }
+.mc--half-v .mc-card.is-next .mc-date { font-size:21px; }
+.mc--half-v .mc-card.is-next .mc-relative { font-size:12px; }
 
-/* Viertelfläche: 2×2, dezente Spaltentrenner, keine Kachelrahmen. */
-.mc--quadrant .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); column-gap:7px; }
-.mc--quadrant .mc-card { align-items:flex-start; justify-content:center; flex-direction:column; gap:3px; padding:5px 6px; }
-.mc--quadrant .mc-card.is-next { padding-left:8px; border-radius:7px; }
-.mc--quadrant .mc-icon,.mc--quadrant .mc-detail { display:none; }
+/* Quadrant (400×240): zwei Spalten, vertikale Textkomposition. */
+.mc--quadrant .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); column-gap:10px; }
+.mc--quadrant .mc-card, .mc--quadrant .mc-card.is-next { align-items:flex-start; justify-content:center; flex-direction:column; gap:3px; padding:4px 6px; }
+.mc--quadrant .mc-icon, .mc--quadrant .mc-detail { display:none; }
 .mc--quadrant .mc-type { font-size:15px; }
 .mc--quadrant .mc-right { min-width:0; text-align:left; }
-.mc--quadrant .mc-date { font-size:16px; }
+.mc--quadrant .mc-date { font-size:15px; }
 .mc--quadrant .mc-relative { font-size:11px; margin-top:2px; }
-.mc--quadrant .mc-card:nth-child(odd):not(.is-next) { border-right:1px solid #ddd; }
-.mc--half-h .mc-message, .mc--half-v .mc-message, .mc--quadrant .mc-message { font-size:13px; padding:5px; }
+.mc--quadrant .mc-card.is-next .mc-type { font-size:18px; }
+.mc--quadrant .mc-card.is-next .mc-date { font-size:18px; }
+.mc--quadrant .mc-card.is-next .mc-relative { font-size:12px; }
+.mc--half-h .mc-message, .mc--half-v .mc-message, .mc--quadrant .mc-message { font-size:13px; padding:6px; }
 
-/* Die X besitzt in Mashups ebenfalls mehr Platz. */
-.screen--v2 .mc--half-h .mc-heading, .screen--v2 .mc--half-v .mc-heading,
+/* TRMNL X-Mashups: mehr Platz, Hierarchie bleibt erhalten. */
+.screen--v2 .mc--half-h .mc-heading,
+.screen--v2 .mc--half-v .mc-heading,
 .screen--v2 .mc--quadrant .mc-heading { font-size:25px; }
 .screen--v2 .mc--half-h .mc-type, .screen--v2 .mc--half-v .mc-type { font-size:22px; }
-.screen--v2 .mc--half-h .mc-date, .screen--v2 .mc--half-v .mc-date { font-size:21px; }
+.screen--v2 .mc--half-h .mc-date, .screen--v2 .mc--half-v .mc-date { font-size:22px; }
 .screen--v2 .mc--half-h .mc-relative, .screen--v2 .mc--half-v .mc-relative { font-size:14px; }
-.screen--v2 .mc--quadrant .mc-type { font-size:20px; }
-.screen--v2 .mc--quadrant .mc-date { font-size:20px; }
+.screen--v2 .mc--half-h .mc-card.is-next .mc-type, .screen--v2 .mc--half-v .mc-card.is-next .mc-type { font-size:27px; }
+.screen--v2 .mc--half-h .mc-card.is-next .mc-date, .screen--v2 .mc--half-v .mc-card.is-next .mc-date { font-size:27px; }
+.screen--v2 .mc--quadrant .mc-type, .screen--v2 .mc--quadrant .mc-date { font-size:20px; }
+.screen--v2 .mc--quadrant .mc-card.is-next .mc-type, .screen--v2 .mc--quadrant .mc-card.is-next .mc-date { font-size:24px; }
 .screen--v2 .mc--quadrant .mc-relative { font-size:13px; }
 
-/* Kleine BYOD-Rahmen ohne v2-Modifikator. */
+/* Kleinere Renderflächen, z.B. TRMNL BYOD mit schmalem Viewport. */
 @media (max-width:600px) {
   .mc--full .mc-heading { font-size:27px; }
-  .mc--full .mc-card { gap:8px; padding:5px 8px; }
-  .mc--full .mc-card.is-next { padding-left:10px; }
-  .mc--full .mc-icon { transform:scale(.74); transform-origin:left center; flex-basis:28px; }
-  .mc--full .mc-type { font-size:19px; }
-  .mc--full .mc-detail { font-size:11px; }
-  .mc--full .mc-right { min-width:100px; }
+  .mc--full .mc-card, .mc--full .mc-card.is-next { gap:7px; padding:5px 8px; }
+  .mc--full .mc-icon { flex-basis:28px; transform:scale(.77); transform-origin:left center; }
+  .mc--full .mc-card.is-next .mc-icon { transform:scale(.90); }
+  .mc--full .mc-type { font-size:18px; }
+  .mc--full .mc-detail { font-size:10px; }
   .mc--full .mc-date { font-size:19px; }
-  .mc--full .mc-relative { font-size:12px; }
-  .mc--full .mc-next { display:none; }
+  .mc--full .mc-right { min-width:100px; }
+  .mc--full .mc-relative { font-size:11px; }
+  .mc--full .mc-card.is-next .mc-type { font-size:23px; }
+  .mc--full .mc-card.is-next .mc-date { font-size:24px; }
+  .mc--full .mc-card.is-next .mc-relative { font-size:12px; }
 }
 </style>
