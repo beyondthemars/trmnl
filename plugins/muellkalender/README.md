@@ -25,6 +25,18 @@ Dieses Plugin zeigt für eine in TRMNL hinterlegte Kieler Abholadresse **vier Ab
 
 Die Liquid-Vorlagen liegen in [`src/`](src/) und das gemeinsame CSS in [`src/shared.liquid`](src/shared.liquid). Es werden überwiegend Weiß, Schwarz und klar unterscheidbare Graustufen verwendet. **Die physischen OG/X- und Hochformatansichten sind noch nicht auf allen Geräten abschließend geprüft**; eine TRMNL-Vorschau ersetzt den Gerätetest nicht.
 
+## Design – Minimal 2 (November 2026)
+
+Alle vier Abholarten verwenden die **gleiche Zeilenstruktur**: links ein dezentes monochromes Tonnen-Symbol, mittig die Abfallart, rechts das Datum und die verbleibenden Tage. **Nur der erste Eintrag mit einem gültigen Termin** bekommt größere Schrift und etwas mehr Höhe; die übrigen drei Termine bleiben ruhiger und kleiner.
+
+- Das bisherige **„ALS NÄCHSTES“** entfällt vollständig.
+- Kein grauer Kartenhintergrund, keine senkrechte Hervorhebungsleiste und keine dicken Umrandungen.
+- Nur dünne Trennlinien, Weißraum und klare Typografie.
+- Alle vier Liquid-Ansichten verwenden diese Hierarchie; OG, X und Portrait bleiben unterstützt.
+- Der Code zur ABKI-Abfrage und die Plugin-Einstellungen sind unverändert.
+
+**Status:** Struktur und Markup sind geprüft. Eine Renderprüfung in TRMNL OG/X nach dem Sync ist weiterhin erforderlich.
+
 ## Datenquelle und Ablauf
 
 Die externe Quelle ist der [Abfallwirtschaftsbetrieb Kiel (ABKI)](https://www.abki.de/dienste/entsorgung-und-recycling/beh%C3%A4lter/leerungstermine.html). Die dort bereitgestellten Angaben umfassen auch die Gelben Säcke/Tonnen, deren Abfuhr von Remondis durchgeführt wird.
