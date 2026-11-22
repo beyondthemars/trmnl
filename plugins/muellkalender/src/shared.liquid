@@ -19,9 +19,14 @@
   overflow:hidden;
   background:#fff;
   color:#171717;
-  font-family:Inter,-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+  --framework-typeface:"Inter Variable", "Inter";
+  font-family:"Inter Variable","Inter","Helvetica Neue",Arial,sans-serif;
 }
-.mc, .mc * { box-sizing:border-box; }
+.mc, .mc * {
+  box-sizing:border-box;
+  /* Explicit font override: use smooth Inter on OG as well as X. */
+  font-family:"Inter Variable","Inter","Helvetica Neue",Arial,sans-serif !important;
+}
 .mc-head {
   display:flex;
   align-items:flex-end;
@@ -31,21 +36,21 @@
   gap:12px;
   padding:3px 8px 13px;
 }
-.mc-head-copy { min-width:0; display:flex; flex-direction:column; gap:7px; }
+.mc-head-copy { min-width:0; display:flex; flex-direction:column; gap:9px; }
 .mc-overline {
-  font-size:10px;
-  font-weight:650;
-  letter-spacing:1.5px;
-  line-height:1;
-  color:#696969;
-  text-transform:uppercase;
+  font-size:18px;
+  font-weight:560;
+  letter-spacing:.15px;
+  line-height:1.15;
+  color:#5c5c5c;
+  text-transform:none;
 }
 .mc-heading {
   margin:0;
   padding:0;
   font-size:33px;
-  font-weight:740;
-  letter-spacing:-1.1px;
+  font-weight:710;
+  letter-spacing:-1.2px;
   line-height:1.05;
   white-space:nowrap;
 }
@@ -126,7 +131,6 @@
   line-height:1.1;
   white-space:nowrap;
 }
-.mc-detail {
   display:block;
   margin-top:5px;
   color:#777;
@@ -160,7 +164,6 @@
 }
 /* Die wichtigste Leerung: etwas mehr Raum und erkennbare Größenhierarchie. */
 .mc-card.is-next .mc-type { font-size:30px; font-weight:760; letter-spacing:-.9px; }
-.mc-card.is-next .mc-detail { font-size:13px; }
 .mc-card.is-next .mc-date { font-size:34px; font-weight:760; letter-spacing:-.9px; }
 .mc-card.is-next .mc-relative { font-size:16px; font-weight:650; color:#333; }
 .mc-footer {
@@ -179,19 +182,17 @@
 .screen--v2 .mc--full { gap:22px; }
 .screen--v2 .mc--full .mc-head { padding:8px 16px 21px; }
 .screen--v2 .mc--full .mc-head-copy { gap:12px; }
-.screen--v2 .mc--full .mc-overline { font-size:16px; letter-spacing:2px; }
+.screen--v2 .mc--full .mc-overline { font-size:26px; letter-spacing:.2px; font-weight:560; }
 .screen--v2 .mc--full .mc-heading { font-size:52px; letter-spacing:-1.7px; }
 .screen--v2 .mc--full .mc-card { gap:29px; padding:13px 23px; border-bottom-width:1.5px; }
 .screen--v2 .mc--full .mc-card.is-next { gap:33px; }
 .screen--v2 .mc--full .mc-icon { transform:scale(1.35); transform-origin:left center; flex-basis:55px; }
 .screen--v2 .mc--full .mc-card.is-next .mc-icon { transform:scale(1.60); }
 .screen--v2 .mc--full .mc-type { font-size:32px; letter-spacing:-.85px; }
-.screen--v2 .mc--full .mc-detail { font-size:17px; margin-top:7px; }
 .screen--v2 .mc--full .mc-date { font-size:35px; }
 .screen--v2 .mc--full .mc-relative { font-size:18px; margin-top:7px; }
 .screen--v2 .mc--full .mc-right { min-width:250px; }
 .screen--v2 .mc--full .mc-card.is-next .mc-type { font-size:43px; }
-.screen--v2 .mc--full .mc-card.is-next .mc-detail { font-size:19px; }
 .screen--v2 .mc--full .mc-card.is-next .mc-date { font-size:47px; }
 .screen--v2 .mc--full .mc-card.is-next .mc-relative { font-size:22px; }
 .screen--v2 .mc--full .mc-footer { font-size:14px; padding:4px 15px 0; }
@@ -215,7 +216,6 @@
 .mc--half-h .mc-card { gap:7px; padding:4px 7px; }
 .mc--half-h .mc-card.is-next { gap:7px; }
 .mc--half-h .mc-icon, .mc--half-h .mc-card.is-next .mc-icon { transform:scale(.78); transform-origin:left center; flex-basis:28px; }
-.mc--half-h .mc-detail { display:none; }
 .mc--half-h .mc-type { font-size:17px; letter-spacing:-.35px; }
 .mc--half-h .mc-right { min-width:94px; }
 .mc--half-h .mc-date { font-size:17px; letter-spacing:-.25px; }
@@ -228,7 +228,6 @@
 .mc--half-v .mc-grid { grid-template-rows:minmax(0,1.16fr) repeat(3,minmax(0,1fr)); }
 .mc--half-v .mc-card, .mc--half-v .mc-card.is-next { gap:7px; padding:4px 6px; }
 .mc--half-v .mc-icon, .mc--half-v .mc-card.is-next .mc-icon { transform:scale(.73); transform-origin:left center; flex-basis:27px; }
-.mc--half-v .mc-detail { display:none; }
 .mc--half-v .mc-type { font-size:17px; }
 .mc--half-v .mc-right { min-width:92px; }
 .mc--half-v .mc-date { font-size:17px; }
@@ -240,7 +239,6 @@
 /* Quadrant (400×240): zwei Spalten, vertikale Textkomposition. */
 .mc--quadrant .mc-grid { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(2,minmax(0,1fr)); column-gap:10px; }
 .mc--quadrant .mc-card, .mc--quadrant .mc-card.is-next { align-items:flex-start; justify-content:center; flex-direction:column; gap:3px; padding:4px 6px; }
-.mc--quadrant .mc-icon, .mc--quadrant .mc-detail { display:none; }
 .mc--quadrant .mc-type { font-size:15px; }
 .mc--quadrant .mc-right { min-width:0; text-align:left; }
 .mc--quadrant .mc-date { font-size:15px; }
@@ -265,12 +263,12 @@
 
 /* Kleinere Renderflächen, z.B. TRMNL BYOD mit schmalem Viewport. */
 @media (max-width:600px) {
+  .mc--full .mc-overline { font-size:15px; }
   .mc--full .mc-heading { font-size:27px; }
   .mc--full .mc-card, .mc--full .mc-card.is-next { gap:7px; padding:5px 8px; }
   .mc--full .mc-icon { flex-basis:28px; transform:scale(.77); transform-origin:left center; }
   .mc--full .mc-card.is-next .mc-icon { transform:scale(.90); }
   .mc--full .mc-type { font-size:18px; }
-  .mc--full .mc-detail { font-size:10px; }
   .mc--full .mc-date { font-size:19px; }
   .mc--full .mc-right { min-width:100px; }
   .mc--full .mc-relative { font-size:11px; }
