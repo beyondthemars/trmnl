@@ -1,7 +1,7 @@
-<div class="layout mc mc--full">
+<div class="layout mc typeface mc--full">
   <div class="mc-head">
     <div class="mc-head-copy">
-      <span class="mc-overline">Abfuhrtermine · Kiel</span>
+      <span class="mc-overline">Kiel · Abfuhrtermine</span>
       <h1 class="mc-heading">Müllkalender</h1>
     </div>
   </div>
@@ -17,15 +17,7 @@
           </div>
           <div class="mc-info">
             <span class="mc-type">{{ bin.label }}</span>
-            <span class="mc-detail">
-              {% case bin.id %}
-                {% when 'rest' %}Schwarze Tonne
-                {% when 'paper' %}Blaue Tonne
-                {% when 'bio' %}Braune Tonne
-                {% when 'yellow' %}Leichtverpackungen
-              {% endcase %}
-            </span>
-          </div>
+            </div>
           <div class="mc-right">
             <span class="mc-date">{{ bin.weekday }}{% if bin.weekday != "" %}. {% endif %}{{ bin.date }}</span>
             <span class="mc-relative">{{ bin.relative }}</span>
